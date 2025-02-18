@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>670</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:white;</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>1161</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="logoGoRemote">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>0</y>
+       <width>521</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>images/goremote.png</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>170</y>
+      <width>1161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>200</y>
+      <width>291</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Ubuntu Sans</family>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Bisnis Segmentasi (Hotel/Restaurant):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputBisnisSegmentasi">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>190</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>240</y>
+      <width>261</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Ubuntu Sans</family>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Geolokasi (Jagakarsa/Depok/dll):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputLimit">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>190</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>200</y>
+      <width>131</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Ubuntu Sans</family>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Limit Pencarian:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>240</y>
+      <width>121</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Ubuntu Sans</family>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Delay (detik):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputGeolokasi">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>240</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputDelay">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>240</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnSearch">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>290</y>
+      <width>88</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+color: rgb(14, 1, 1);
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Search</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>290</y>
+      <width>88</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+color: rgb(14, 1, 1);
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Cancel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>290</y>
+      <width>88</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:black;
+color: rgb(14, 1, 1);
+font-weight:bold;</string>
+    </property>
+    <property name="text">
+     <string>Download</string>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>330</y>
+      <width>1161</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font-weight:bold;
+color:white;
+border-color: rgb(255, 255, 255);
+background-color: rgb(40, 32, 32)</string>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Hasil Terkini</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1131</width>
+        <height>211</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: solid 1px rgb(255, 255, 255);
+</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Panel</enum>
+      </property>
+      <row/>
+      <row/>
+      <column>
+       <property name="text">
+        <string>Nama</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Rate</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>No.Telepon</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Email</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Alamat</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Instagram</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Facebook</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>TikTok</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Youtube</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Linkedin</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Linkedin</string>
+       </property>
+      </column>
+      <item row="0" column="0">
+       <property name="text">
+        <string>Hotel Indonesia</string>
+       </property>
+      </item>
+      <item row="0" column="1">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="2">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="3">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="4">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="5">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="6">
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+      <item row="0" column="7">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="8">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="9">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="0" column="10">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item row="1" column="0">
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Riwayat Pencarian</string>
+     </attribute>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:white;
+font-weight:bold;
+background-color: rgb(6, 37, 210);</string>
+   </property>
+   <widget class="QMenu" name="menuAccount">
+    <property name="title">
+     <string>Account</string>
+    </property>
+    <addaction name="actionLogin"/>
+    <addaction name="actionLogout"/>
+   </widget>
+   <addaction name="menuAccount"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLogin">
+   <property name="text">
+    <string>Login</string>
+   </property>
+  </action>
+  <action name="actionLogout">
+   <property name="text">
+    <string>Logout</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
