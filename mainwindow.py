@@ -29,6 +29,37 @@ class MainWindow(QMainWindow):
 
         self.ui.btnSearch.clicked.connect(self.on_btn_search_clicked)
 
+        #modifikasi button
+        style_button = """
+        QPushButton {
+            background-color: #0078D7;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 2px solid #005A9E;
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:hover {
+            background-color: #005A9E;
+            border: 2px solid #003F73;
+        }
+        QPushButton:pressed {
+            background-color: #004A8F;
+            border: 2px solid #002F5E;
+            box-shadow: none;
+        }
+        """
+        self.ui.btnDownload.setStyleSheet(style_button)
+        self.ui.btnSearch.setStyleSheet(style_button)
+        self.ui.btnCancel.setStyleSheet(style_button)
+
+
+    def load_stylsheet(filename):
+        with open(filename, "r") as file:
+            return file.read()
+
     def on_btn_search_clicked(self):
         #Tangkap input dari form
         bisnis_segmentasi = self.ui.inputBisnisSegmentasi.text()
