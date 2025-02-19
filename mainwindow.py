@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 #     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_MainWindow
 from validateform import validateform
+from scrapping import scrapping
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
+            scrapping.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
             print("Form valid!")
 
     def show_error(self, message):
