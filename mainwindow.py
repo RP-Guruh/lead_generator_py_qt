@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 #     pyside6-uic form.ui -o ui_form.py, or
 #     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_MainWindow
-from validateform import validateform  # Mengimpor kelas validateform
+from validateform import validateform
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
