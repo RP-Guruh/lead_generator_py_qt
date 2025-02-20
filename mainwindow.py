@@ -71,7 +71,8 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            scrapping.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
+            scraper = scrapping()
+            scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
             print("Form valid!")
 
     def show_error(self, message):
