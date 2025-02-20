@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 #     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_MainWindow
 from validateform import validateform  # Mengimpor kelas validateform
+from scrapping import scrapping
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -56,9 +57,6 @@ class MainWindow(QMainWindow):
         self.ui.btnCancel.setStyleSheet(style_button)
 
 
-    def load_stylsheet(filename):
-        with open(filename, "r") as file:
-            return file.read()
 
     def on_btn_search_clicked(self):
         #Tangkap input dari form
@@ -73,6 +71,7 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
+            scrapping.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
             print("Form valid!")
 
     def show_error(self, message):

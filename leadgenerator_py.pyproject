@@ -2,6 +2,8 @@
     "files": [
         "mainwindow.py",
         "form.ui",
-        "validateform.py"
+        "validateform.py",
+        "checkuuidos.py",
+        "scrapping.py"
     ]
 }
