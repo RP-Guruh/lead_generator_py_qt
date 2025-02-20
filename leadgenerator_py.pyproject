@@ -4,6 +4,7 @@
         "form.ui",
         "validateform.py",
         "checkuuidos.py",
-        "scrapping.py"
+        "scrapping.py",
+        "databasesqlite.py"
     ]
 }

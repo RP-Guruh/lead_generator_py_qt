@@ -10,12 +10,16 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui_form import Ui_MainWindow
 from validateform import validateform  # Mengimpor kelas validateform
 from scrapping import scrapping
+from databasesqlite import databasesqlite
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # Simpan koneksi database
+        self.db = databasesqlite()
 
         # Title Aplikasi
         self.setWindowTitle("Lead Generator by GoRemote")
