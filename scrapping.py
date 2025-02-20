@@ -6,7 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-
+from databasesqlite import databasesqlite
+from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from itertools import zip_longest
 import time
@@ -45,6 +46,7 @@ class scrapping:
         thread.start()
 
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+        db = databasesqlite()
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
         # Buka halaman pencarian
@@ -52,7 +54,11 @@ class scrapping:
         time.sleep(2)
 
         # Proses scrapping
+        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian))
+
+        #simpan riwayat pencarian
+        db.save_search_history(bisnis_segmentasi, geolokasi, int(limit_pencarian), int(delay_pencarian), search_date)
 
         print("Scrapping selesai.")
         self.driver.quit()
@@ -290,3 +296,4 @@ class scrapping:
             json.dump(self.results, file, indent=4, ensure_ascii=False)
 
         print("Data berhasil disimpan dalam results.txt")
+

@@ -1,5 +1,3 @@
-# This Python file uses the following encoding: utf-8
-
 import sqlite3
 import os
 
@@ -16,11 +14,12 @@ class databasesqlite:
 
         self.conn = sqlite3.connect(self.db_file)
         if not db_exists:
-            self.build_table()  # Hanya buat tabel jika DB baru dibuat
+            self.build_table()
             print("Tabel berhasil dibuat.")
 
     def build_table(self):
         cursor = self.conn.cursor()
+
         # Buat tabel search_histories
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS search_histories (
@@ -72,7 +71,6 @@ class databasesqlite:
 
         self.conn.commit()
 
-
     def close(self):
         if self.conn:
             self.conn.close()
@@ -84,3 +82,16 @@ class databasesqlite:
     def get_connection(self):
         return self.conn
 
+    def save_search_history(self, keyword, place, search_limit, delay, search_date):
+
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO search_histories (keyword, place, search_limit, delay, search_date)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (keyword, place, search_limit, delay, search_date))
+
+            self.conn.commit()
+            print("Riwayat pencarian berhasil disimpan.")
+        except sqlite3.Error as e:
+            print(f"Terjadi kesalahan saat menyimpan riwayat pencarian: {e}")
