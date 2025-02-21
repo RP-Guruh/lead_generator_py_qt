@@ -19,7 +19,6 @@ class MainWindow(QMainWindow):
 
         # Hubungkan signal `dataInserted` dengan method `load_results`
         self.db = databasesqlite()
-        self.db.dataInserted.connect(self.load_results)
 
         # Panggil untuk menampilkan data awal
         self.load_results()
@@ -52,6 +51,7 @@ class MainWindow(QMainWindow):
         else:
             scraper = scrapping()
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
+
             print("Form valid!")
 
     def show_error(self, message):

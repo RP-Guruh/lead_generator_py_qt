@@ -10,14 +10,15 @@ from databasesqlite import databasesqlite
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from itertools import zip_longest
+from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import QMetaObject, Qt, QObject, Slot
 import time
 import threading
 import re
-import json
 
-
-class scrapping:
+class scrapping(QObject):
     def __init__(self):
+        super().__init__()
         chrome_options = Options()
         # chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
@@ -50,6 +51,19 @@ class scrapping:
         thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian))
         thread.start()
 
+    def message_success(self):
+        # Panggil _show_message di UI thread dengan benar
+        QMetaObject.invokeMethod(self, "_show_message", Qt.QueuedConnection)
+
+    @Slot()
+    def _show_message(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Success")
+        msg.setText("Pencarian data berhasil dilakukan")
+        msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
+        msg.exec()
+
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
@@ -63,6 +77,7 @@ class scrapping:
 
         print("Scrapping selesai.")
         self.driver.quit()
+        self.message_success()
 
     def scrapping_process(self, driver, limit, delay):
         db = databasesqlite()
@@ -297,5 +312,6 @@ class scrapping:
 
             #simpan riwayat pencarian
         db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), self.search_date, self.results)
+
 
 
