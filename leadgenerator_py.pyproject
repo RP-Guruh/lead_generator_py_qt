@@ -6,6 +6,6 @@
         "checkuuidos.py",
         "scrapping.py",
         "api.py",
-        "database.py"
+        "databasesqlite.py"
     ]
 }

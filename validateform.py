@@ -8,14 +8,14 @@ class validateform:
         if not bisnis_val:
             pesan = "Bisnis segmentasi tidak boleh kosong"
             return False, pesan
-        if not bisnis_val.isalpha():
+        if not bisnis_val.replace(" ", "").isalpha():
             pesan = "Bisnis segmentasi harus berupa huruf"
             return False, pesan
 
         if not geolokasi_val:
             pesan = "Geolokasi tidak boleh kosong"
             return False, pesan
-        if not geolokasi_val.isalpha():
+        if not geolokasi_val.replace(" ", "").isalpha():
             pesan = "Geolokasi harus berupa huruf"
             return False, pesan
 
