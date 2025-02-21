@@ -39,14 +39,18 @@ class scrapping:
         self.tiktok_items = []
         self.youtube_items = []
         self.email_items = []
+        self.search_date = 0
+        self.bisnisSegmentasi = None
+        self.geolokasiBisnis = None
 
     def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+        self.bisnisSegmentasi = bisnis_segmentasi
+        self.geolokasiBisnis = geolokasi
         #Jalankan scrapping di thread terpisah agar GUI tidak not responding
         thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian))
         thread.start()
 
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
-        db = databasesqlite()
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
         # Buka halaman pencarian
@@ -54,16 +58,14 @@ class scrapping:
         time.sleep(2)
 
         # Proses scrapping
-        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian))
-
-        #simpan riwayat pencarian
-        db.save_search_history(bisnis_segmentasi, geolokasi, int(limit_pencarian), int(delay_pencarian), search_date)
 
         print("Scrapping selesai.")
         self.driver.quit()
 
     def scrapping_process(self, driver, limit, delay):
+        db = databasesqlite()
         el_nama_lokasi = self.driver.find_elements("xpath", f"//*[contains(@class, 'hfpxzc')]")
         el_rating = self.driver.find_elements("css selector", f".MW4etd") or []  # Pastikan selalu ada
         el_ulasan = self.driver.find_elements("css selector", f".UY7F9") or []  # Pastikan selalu ada
@@ -292,8 +294,9 @@ class scrapping:
                 "facebook": facebook,
                 "email": email
             })
-        with open("results.txt", "w", encoding="utf-8") as file:
-            json.dump(self.results, file, indent=4, ensure_ascii=False)
 
-        print("Data berhasil disimpan dalam results.txt")
+            #simpan riwayat pencarian
+        db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), self.search_date, self.results)
+
+
 

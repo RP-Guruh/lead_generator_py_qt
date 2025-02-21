@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys
-
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from databasesqlite import databasesqlite
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -10,16 +10,23 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui_form import Ui_MainWindow
 from validateform import validateform  # Mengimpor kelas validateform
 from scrapping import scrapping
-from databasesqlite import databasesqlite
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
+
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
         # Simpan koneksi database
+        # Buat objek databasesqlite dengan QObject
         self.db = databasesqlite()
+
+        # Hubungkan signal `dataInserted` dengan method `load_results`
+        self.db.dataInserted.connect(self.load_results)
+
+        # Panggil untuk menampilkan data awal
+        self.load_results()
 
         # Title Aplikasi
         self.setWindowTitle("Lead Generator by GoRemote")
@@ -87,6 +94,23 @@ class MainWindow(QMainWindow):
         msg.setText(message)
         msg.setStyleSheet("QLabel { color : black; } QPushButton { color : black; }")
         msg.exec()
+
+    def load_results(self):
+        results = self.db.get_current_result()  # Panggil method dari databasesqlite
+
+        # Pastikan ada data untuk dimasukkan ke table
+        if not results:
+            return
+
+        # Update tableTerkini
+        self.ui.tableTerkini.setRowCount(len(results))
+        self.ui.tableTerkini.setColumnCount(len(results[0]))
+
+        for row_idx, row in enumerate(results):
+            for col_idx, value in enumerate(row):
+                item = QTableWidgetItem(str(value))  # Konversi ke string sebelum dimasukkan
+                self.ui.tableTerkini.setItem(row_idx, col_idx, item)
+
 
 
 
