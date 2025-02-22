@@ -160,6 +160,30 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
+        self.tableRiwayatPencarian = QTableWidget(self.tab_2)
+        if (self.tableRiwayatPencarian.columnCount() < 7):
+            self.tableRiwayatPencarian.setColumnCount(7)
+        __qtablewidgetitem14 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(0, __qtablewidgetitem14)
+        __qtablewidgetitem15 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(1, __qtablewidgetitem15)
+        __qtablewidgetitem16 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(2, __qtablewidgetitem16)
+        __qtablewidgetitem17 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(3, __qtablewidgetitem17)
+        __qtablewidgetitem18 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(4, __qtablewidgetitem18)
+        __qtablewidgetitem19 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(5, __qtablewidgetitem19)
+        __qtablewidgetitem20 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(6, __qtablewidgetitem20)
+        if (self.tableRiwayatPencarian.rowCount() < 2):
+            self.tableRiwayatPencarian.setRowCount(2)
+        self.tableRiwayatPencarian.setObjectName(u"tableRiwayatPencarian")
+        self.tableRiwayatPencarian.setGeometry(QRect(10, 10, 1131, 211))
+        self.tableRiwayatPencarian.setStyleSheet(u"border: solid 1px rgb(255, 255, 255);\n"
+"")
+        self.tableRiwayatPencarian.setFrameShape(QFrame.Panel)
         self.tabWidget.addTab(self.tab_2, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -224,13 +248,23 @@ class Ui_MainWindow(object):
 
         __sortingEnabled = self.tableTerkini.isSortingEnabled()
         self.tableTerkini.setSortingEnabled(False)
-        ___qtablewidgetitem11 = self.tableTerkini.item(0, 0)
-        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"Hotel Indonesia", None));
-        ___qtablewidgetitem12 = self.tableTerkini.item(0, 1)
-        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"1", None));
         self.tableTerkini.setSortingEnabled(__sortingEnabled)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Hasil Terkini", None))
+        ___qtablewidgetitem11 = self.tableRiwayatPencarian.horizontalHeaderItem(0)
+        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"ID", None));
+        ___qtablewidgetitem12 = self.tableRiwayatPencarian.horizontalHeaderItem(1)
+        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"Bisnis Segmentasi", None));
+        ___qtablewidgetitem13 = self.tableRiwayatPencarian.horizontalHeaderItem(2)
+        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"Geolokasi", None));
+        ___qtablewidgetitem14 = self.tableRiwayatPencarian.horizontalHeaderItem(3)
+        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"Jumlah Pencarian", None));
+        ___qtablewidgetitem15 = self.tableRiwayatPencarian.horizontalHeaderItem(4)
+        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"Hasil didapat", None));
+        ___qtablewidgetitem16 = self.tableRiwayatPencarian.horizontalHeaderItem(5)
+        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"Delay Pencarian", None));
+        ___qtablewidgetitem17 = self.tableRiwayatPencarian.horizontalHeaderItem(6)
+        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"Tanggal Pencarian", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Riwayat Pencarian", None))
         self.menuAccount.setTitle(QCoreApplication.translate("MainWindow", u"Account", None))
     # retranslateUi

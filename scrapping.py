@@ -89,8 +89,11 @@ class scrapping(QObject):
 
     def update_table(self):
         db = databasesqlite()
-        results = db.get_current_result()  # Panggil method dari databasesqlite
-        TableHelper.populate_table(self.ui.tableTerkini, results)
+        results_current = db.get_current_result()
+        results_history = db.get_search_history()
+        TableHelper.populate_table(self.ui.tableTerkini, results_current)
+        TableHelper.populate_table(self.ui.tableRiwayatPencarian, results_history)
+
 
     def scrapping_process(self, driver, limit, delay):
         db = databasesqlite()
@@ -323,8 +326,9 @@ class scrapping(QObject):
                 "email": email
             })
 
-            #simpan riwayat pencarian
-        db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), self.search_date, self.results)
+        jumlah_valid_results = sum(1 for result in self.results if result.get("nama_lokasi"))
+        #simpan riwayat pencarian
+        db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), jumlah_valid_results, self.search_date, self.results)
 
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")

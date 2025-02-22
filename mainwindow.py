@@ -72,12 +72,10 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def load_results(self):
-        results = self.db.get_current_result()  # Panggil method dari databasesqlite
-        TableHelper.populate_table(self.ui.tableTerkini, results)
-
-        # Pastikan ada data untuk dimasukkan ke table
-
-
+        results_current = self.db.get_current_result()
+        results_history = self.db.get_search_history()
+        TableHelper.populate_table(self.ui.tableTerkini, results_current)
+        TableHelper.populate_table(self.ui.tableRiwayatPencarian, results_history)
 
 
 if __name__ == "__main__":

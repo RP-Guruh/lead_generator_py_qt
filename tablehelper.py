@@ -13,3 +13,4 @@ class TableHelper:
             for col_idx, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 table_widget.setItem(row_idx, col_idx, item)
+

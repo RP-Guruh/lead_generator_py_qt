@@ -32,6 +32,7 @@ class databasesqlite(QObject):
                 place TEXT,
                 search_limit TEXT,
                 delay TEXT,
+                hasil TEXT,
                 search_date TEXT
             )
         ''')
@@ -85,13 +86,13 @@ class databasesqlite(QObject):
     def get_connection(self):
         return self.conn
 
-    def save_search_history(self, keyword, place, search_limit, delay, search_date, results_search):
+    def save_search_history(self, keyword, place, search_limit, delay, hasil, search_date, results_search):
         try:
             cursor = self.conn.cursor()
             cursor.execute('''
-                INSERT INTO search_histories (keyword, place, search_limit, delay, search_date)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (keyword, place, search_limit, delay, search_date))
+                INSERT INTO search_histories (keyword, place, search_limit, delay, hasil, search_date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (keyword, place, search_limit, delay, hasil, search_date))
 
             self.conn.commit()
 
@@ -145,3 +146,18 @@ class databasesqlite(QObject):
         except sqlite3.Error as e:
             print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
             return []
+
+    def get_search_history(self):
+        try:
+            cursor = self.conn.cursor()
+
+            # Ambil data berdasarkan id_histories
+            cursor.execute('SELECT id, keyword, place, search_limit, hasil, delay, search_date FROM search_histories ORDER BY id DESC')
+            rows = cursor.fetchall()
+
+            return rows  # Kembalikan hasilnya
+
+        except sqlite3.Error as e:
+            print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
+            return []
+

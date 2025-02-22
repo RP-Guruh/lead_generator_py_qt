@@ -364,12 +364,12 @@ background-color: rgb(40, 32, 32)</string>
       </column>
       <item row="0" column="0">
        <property name="text">
-        <string>Hotel Indonesia</string>
+        <string/>
        </property>
       </item>
       <item row="0" column="1">
        <property name="text">
-        <string>1</string>
+        <string/>
        </property>
       </item>
       <item row="1" column="0">
@@ -383,6 +383,60 @@ background-color: rgb(40, 32, 32)</string>
      <attribute name="title">
       <string>Riwayat Pencarian</string>
      </attribute>
+     <widget class="QTableWidget" name="tableRiwayatPencarian">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1131</width>
+        <height>211</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: solid 1px rgb(255, 255, 255);
+</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Panel</enum>
+      </property>
+      <row/>
+      <row/>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Bisnis Segmentasi</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Geolokasi</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Jumlah Pencarian</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hasil didapat</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Delay Pencarian</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tanggal Pencarian</string>
+       </property>
+      </column>
+     </widget>
     </widget>
    </widget>
   </widget>
