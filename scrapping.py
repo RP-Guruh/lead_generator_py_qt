@@ -50,6 +50,10 @@ class scrapping(QObject):
         self.geolokasiBisnis = None
 
     def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+        self.ui.btnCancel.setEnabled(True)
+        self.ui.btnSearch.setEnabled(False)
+        self.ui.btnDownload.setEnabled(False)
+
         self.bisnisSegmentasi = bisnis_segmentasi
         self.geolokasiBisnis = geolokasi
         #Jalankan scrapping di thread terpisah agar GUI tidak not responding
@@ -85,6 +89,9 @@ class scrapping(QObject):
         self.driver.quit()
         self.message_success()
         self.update_table()
+        self.ui.btnCancel.setEnabled(False)
+        self.ui.btnSearch.setEnabled(True)
+        self.ui.btnDownload.setEnabled(True)
 
 
     def update_table(self):

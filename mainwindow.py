@@ -23,6 +23,9 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # disabled tombol cancel
+        self.ui.btnCancel.setEnabled(False)
+
         # Hubungkan signal `dataInserted` dengan method `load_results`
         self.db = databasesqlite()
 
@@ -42,6 +45,7 @@ class MainWindow(QMainWindow):
 
         self.ui.btnSearch.clicked.connect(self.on_btn_search_clicked)
         self.ui.btnDownload.clicked.connect(self.download_current_result)
+        self.ui.btnCancel.clicked.connect(self.cancel_scrapping)
 
 
     def on_btn_search_clicked(self):
@@ -86,8 +90,7 @@ class MainWindow(QMainWindow):
 
 
     def cancel_scrapping(self):
-        scraper = scrapping(self.ui)
-        scraper.cancel_scrapping()
+        print("cancel diklik")
 
     def show_error(self, message):
         # Menampilkan pesan kesalahan menggunakan QMessageBox
