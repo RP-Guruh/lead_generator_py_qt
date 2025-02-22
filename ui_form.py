@@ -98,16 +98,16 @@ class Ui_MainWindow(object):
         self.btnSearch.setStyleSheet(u"color:black;\n"
 "color: rgb(14, 1, 1);\n"
 "font-weight:bold;")
-        self.pushButton_2 = QPushButton(self.centralwidget)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-        self.pushButton_2.setGeometry(QRect(130, 290, 88, 26))
-        self.pushButton_2.setStyleSheet(u"color:black;\n"
+        self.btnCancel = QPushButton(self.centralwidget)
+        self.btnCancel.setObjectName(u"btnCancel")
+        self.btnCancel.setGeometry(QRect(130, 290, 88, 26))
+        self.btnCancel.setStyleSheet(u"color:black;\n"
 "color: rgb(14, 1, 1);\n"
 "font-weight:bold;")
-        self.pushButton_3 = QPushButton(self.centralwidget)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-        self.pushButton_3.setGeometry(QRect(240, 290, 88, 26))
-        self.pushButton_3.setStyleSheet(u"color:black;\n"
+        self.btnDownload = QPushButton(self.centralwidget)
+        self.btnDownload.setObjectName(u"btnDownload")
+        self.btnDownload.setGeometry(QRect(240, 290, 88, 26))
+        self.btnDownload.setStyleSheet(u"color:black;\n"
 "color: rgb(14, 1, 1);\n"
 "font-weight:bold;")
         self.tabWidget = QTabWidget(self.centralwidget)
@@ -120,8 +120,8 @@ class Ui_MainWindow(object):
         self.tab = QWidget()
         self.tab.setObjectName(u"tab")
         self.tableTerkini = QTableWidget(self.tab)
-        if (self.tableTerkini.columnCount() < 11):
-            self.tableTerkini.setColumnCount(11)
+        if (self.tableTerkini.columnCount() < 12):
+            self.tableTerkini.setColumnCount(12)
         __qtablewidgetitem = QTableWidgetItem()
         self.tableTerkini.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
@@ -144,14 +144,16 @@ class Ui_MainWindow(object):
         self.tableTerkini.setHorizontalHeaderItem(9, __qtablewidgetitem9)
         __qtablewidgetitem10 = QTableWidgetItem()
         self.tableTerkini.setHorizontalHeaderItem(10, __qtablewidgetitem10)
+        __qtablewidgetitem11 = QTableWidgetItem()
+        self.tableTerkini.setHorizontalHeaderItem(11, __qtablewidgetitem11)
         if (self.tableTerkini.rowCount() < 2):
             self.tableTerkini.setRowCount(2)
-        __qtablewidgetitem11 = QTableWidgetItem()
-        self.tableTerkini.setItem(0, 0, __qtablewidgetitem11)
         __qtablewidgetitem12 = QTableWidgetItem()
-        self.tableTerkini.setItem(0, 1, __qtablewidgetitem12)
+        self.tableTerkini.setItem(0, 0, __qtablewidgetitem12)
         __qtablewidgetitem13 = QTableWidgetItem()
-        self.tableTerkini.setItem(1, 0, __qtablewidgetitem13)
+        self.tableTerkini.setItem(0, 1, __qtablewidgetitem13)
+        __qtablewidgetitem14 = QTableWidgetItem()
+        self.tableTerkini.setItem(1, 0, __qtablewidgetitem14)
         self.tableTerkini.setObjectName(u"tableTerkini")
         self.tableTerkini.setGeometry(QRect(10, 10, 1131, 211))
         self.tableTerkini.setStyleSheet(u"border: solid 1px rgb(255, 255, 255);\n"
@@ -163,20 +165,20 @@ class Ui_MainWindow(object):
         self.tableRiwayatPencarian = QTableWidget(self.tab_2)
         if (self.tableRiwayatPencarian.columnCount() < 7):
             self.tableRiwayatPencarian.setColumnCount(7)
-        __qtablewidgetitem14 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(0, __qtablewidgetitem14)
         __qtablewidgetitem15 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(1, __qtablewidgetitem15)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(0, __qtablewidgetitem15)
         __qtablewidgetitem16 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(2, __qtablewidgetitem16)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(1, __qtablewidgetitem16)
         __qtablewidgetitem17 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(3, __qtablewidgetitem17)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(2, __qtablewidgetitem17)
         __qtablewidgetitem18 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(4, __qtablewidgetitem18)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(3, __qtablewidgetitem18)
         __qtablewidgetitem19 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(5, __qtablewidgetitem19)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(4, __qtablewidgetitem19)
         __qtablewidgetitem20 = QTableWidgetItem()
-        self.tableRiwayatPencarian.setHorizontalHeaderItem(6, __qtablewidgetitem20)
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(5, __qtablewidgetitem20)
+        __qtablewidgetitem21 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(6, __qtablewidgetitem21)
         if (self.tableRiwayatPencarian.rowCount() < 2):
             self.tableRiwayatPencarian.setRowCount(2)
         self.tableRiwayatPencarian.setObjectName(u"tableRiwayatPencarian")
@@ -221,8 +223,8 @@ class Ui_MainWindow(object):
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Limit Pencarian:", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Delay (detik):", None))
         self.btnSearch.setText(QCoreApplication.translate("MainWindow", u"Search", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"Download", None))
+        self.btnCancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
+        self.btnDownload.setText(QCoreApplication.translate("MainWindow", u"Download", None))
         ___qtablewidgetitem = self.tableTerkini.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Nama", None));
         ___qtablewidgetitem1 = self.tableTerkini.horizontalHeaderItem(1)
@@ -245,26 +247,28 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"Twitter", None));
         ___qtablewidgetitem10 = self.tableTerkini.horizontalHeaderItem(10)
         ___qtablewidgetitem10.setText(QCoreApplication.translate("MainWindow", u"Youtube", None));
+        ___qtablewidgetitem11 = self.tableTerkini.horizontalHeaderItem(11)
+        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"tiktok", None));
 
         __sortingEnabled = self.tableTerkini.isSortingEnabled()
         self.tableTerkini.setSortingEnabled(False)
         self.tableTerkini.setSortingEnabled(__sortingEnabled)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Hasil Terkini", None))
-        ___qtablewidgetitem11 = self.tableRiwayatPencarian.horizontalHeaderItem(0)
-        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"ID", None));
-        ___qtablewidgetitem12 = self.tableRiwayatPencarian.horizontalHeaderItem(1)
-        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"Bisnis Segmentasi", None));
-        ___qtablewidgetitem13 = self.tableRiwayatPencarian.horizontalHeaderItem(2)
-        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"Geolokasi", None));
-        ___qtablewidgetitem14 = self.tableRiwayatPencarian.horizontalHeaderItem(3)
-        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"Jumlah Pencarian", None));
-        ___qtablewidgetitem15 = self.tableRiwayatPencarian.horizontalHeaderItem(4)
-        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"Hasil didapat", None));
-        ___qtablewidgetitem16 = self.tableRiwayatPencarian.horizontalHeaderItem(5)
-        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"Delay Pencarian", None));
-        ___qtablewidgetitem17 = self.tableRiwayatPencarian.horizontalHeaderItem(6)
-        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"Tanggal Pencarian", None));
+        ___qtablewidgetitem12 = self.tableRiwayatPencarian.horizontalHeaderItem(0)
+        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"ID", None));
+        ___qtablewidgetitem13 = self.tableRiwayatPencarian.horizontalHeaderItem(1)
+        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"Bisnis Segmentasi", None));
+        ___qtablewidgetitem14 = self.tableRiwayatPencarian.horizontalHeaderItem(2)
+        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"Geolokasi", None));
+        ___qtablewidgetitem15 = self.tableRiwayatPencarian.horizontalHeaderItem(3)
+        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"Jumlah Pencarian", None));
+        ___qtablewidgetitem16 = self.tableRiwayatPencarian.horizontalHeaderItem(4)
+        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"Hasil didapat", None));
+        ___qtablewidgetitem17 = self.tableRiwayatPencarian.horizontalHeaderItem(5)
+        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"Delay Pencarian", None));
+        ___qtablewidgetitem18 = self.tableRiwayatPencarian.horizontalHeaderItem(6)
+        ___qtablewidgetitem18.setText(QCoreApplication.translate("MainWindow", u"Tanggal Pencarian", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Riwayat Pencarian", None))
         self.menuAccount.setTitle(QCoreApplication.translate("MainWindow", u"Account", None))
     # retranslateUi

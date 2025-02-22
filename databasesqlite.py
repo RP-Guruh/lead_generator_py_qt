@@ -138,7 +138,7 @@ class databasesqlite(QObject):
                 return []  # Jika tidak ada data, kembalikan list kosong
 
             # Ambil data berdasarkan id_histories
-            cursor.execute('SELECT nama_lokasi, rate, jumlah_ulasan, no_telepon, email, website, alamat, instagram, facebook, twitter, linkedln, youtube FROM search_results WHERE id_histories = ?', (last_id,))
+            cursor.execute('SELECT nama_lokasi, rate, jumlah_ulasan, no_telepon, email, website, alamat, instagram, facebook, twitter, linkedln, youtube, tiktok FROM search_results WHERE id_histories = ?', (last_id,))
             rows = cursor.fetchall()
 
             return rows  # Kembalikan hasilnya

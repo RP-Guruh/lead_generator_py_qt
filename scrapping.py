@@ -333,4 +333,3 @@ class scrapping(QObject):
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")
 
-

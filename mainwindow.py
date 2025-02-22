@@ -1,5 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import sys
+import pandas as pd
+import os
+import subprocess
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem
 from PySide6.QtCore import Slot
@@ -38,6 +41,7 @@ class MainWindow(QMainWindow):
         self.ui.logoGoRemote.setScaledContents(True)
 
         self.ui.btnSearch.clicked.connect(self.on_btn_search_clicked)
+        self.ui.btnDownload.clicked.connect(self.download_current_result)
 
 
     def on_btn_search_clicked(self):
@@ -55,8 +59,35 @@ class MainWindow(QMainWindow):
         else:
             scraper = scrapping(self.ui)
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
-
             print("Form valid!")
+
+    def download_current_result(self):
+
+        results_current = self.db.get_current_result()
+        print(f"Jumlah kolom dalam data: {len(results_current[0])}")
+
+        # Tentukan folder Downloads berdasarkan sistem operasi
+        if sys.platform.startswith("win"):  # Windows
+            downloads_folder = os.path.join(os.environ["USERPROFILE"], "Downloads")
+        elif sys.platform.startswith("linux") or sys.platform.startswith("darwin"):  # Linux & macOS
+            downloads_folder = os.path.join(os.environ["HOME"], "Downloads")
+        else:
+            downloads_folder = os.getcwd()  # Jika tidak dikenali, simpan di folder saat ini
+        # Path lengkap untuk file Excel
+        file_path = os.path.join(downloads_folder, "searching_current_data.xlsx")
+
+        df = pd.DataFrame(results_current, columns=[
+            "nama_lokasi", "rate", "jumlah_ulasan", "no_telepon", "email", "website", "alamat", "instagram", "facebook", "twitter", "linkedln", "youtube", "tiktok"
+        ])
+        # Simpan ke Excel
+        df.to_excel(file_path, index=False)
+        message = f"File berhasil disimpan di: {file_path}"
+        self.success_download(message)
+
+
+    def cancel_scrapping(self):
+        scraper = scrapping(self.ui)
+        scraper.cancel_scrapping()
 
     def show_error(self, message):
         # Menampilkan pesan kesalahan menggunakan QMessageBox
@@ -67,8 +98,13 @@ class MainWindow(QMainWindow):
         msg.setStyleSheet("QLabel { color : black; } QPushButton { color : black; }")
         msg.exec()
 
-    def test_signal(self):
-        print("dipanggil dari signal")
+    def success_download(self, message):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Download successfull")
+        msg.setText(message)
+        msg.setStyleSheet("QLabel { color : black; } QPushButton { color : black; }")
+        msg.exec()
 
     @Slot()
     def load_results(self):

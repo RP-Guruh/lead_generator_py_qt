@@ -231,7 +231,7 @@ font-weight:bold;</string>
      <string>Search</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="btnCancel">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -249,7 +249,7 @@ font-weight:bold;</string>
      <string>Cancel</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="btnDownload">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -360,6 +360,11 @@ background-color: rgb(40, 32, 32)</string>
       <column>
        <property name="text">
         <string>Youtube</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>tiktok</string>
        </property>
       </column>
       <item row="0" column="0">
