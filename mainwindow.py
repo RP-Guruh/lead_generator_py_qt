@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import os
 import subprocess
+from datetime import datetime
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton
 from PySide6.QtCore import Slot
@@ -65,14 +66,15 @@ class MainWindow(QMainWindow):
         else:
             scraper = scrapping(self.ui)
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
-            print("Form valid!")
+
 
     def on_table_double_click(self, row, column):
 
         if column == 0:
             item = self.ui.tableRiwayatPencarian.item(row, column)
             id = item.text()
-            print(id)
+            results = self.db.get_data_byid(id)
+
             # Buat dialog
             dlg = QDialog(self)
             dlg.setWindowTitle("Detail Riwayat Pencarian")
@@ -80,8 +82,8 @@ class MainWindow(QMainWindow):
 
             # Header tabel
             headers = [
-                "Nama Lokasi", "Rate", "Jumlah Ulasan", "Alamat", "Website", "No Telepon", "Link",
-                "Twitter", "TikTok", "Instagram", "Facebook", "YouTube", "LinkedIn", "Email"
+                "Nama Lokasi", "Rate", "Jumlah Ulasan", "No.Telepon", "Email", "Website", "Alamat",
+                "Instagram", "Facebook", "Twitter", "Linkdln", "YouTube", "Tiktok", "Link Gmaps"
             ]
 
             # Buat tabel
@@ -92,14 +94,13 @@ class MainWindow(QMainWindow):
             table.setHorizontalHeaderLabels(headers)
 
             # Isi data ke dalam tabel
-            for i in range(len(headers)):
-                item = self.ui.tableRiwayatPencarian.item(row, i)
-                if item:
-                    table.setItem(0, i, QTableWidgetItem(item.text()))
+            TableHelper.populate_table(table, results)
 
             # Tombol Download (tanpa fungsi)
             btn_download = QPushButton("Download")
-            btn_download.setStyleSheet("color:black; font-weight:bold;")
+            btn_download.setStyleSheet("color:white; font-weight:bold; background-color: blue;")
+            btn_download.clicked.connect(lambda: self.download_by_id(id))
+
 
             # Layout tombol di atas tabel
             layout = QVBoxLayout()
@@ -114,10 +115,8 @@ class MainWindow(QMainWindow):
             dlg.exec()
 
     def download_current_result(self):
-
+        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         results_current = self.db.get_current_result()
-        print(f"Jumlah kolom dalam data: {len(results_current[0])}")
-
         # Tentukan folder Downloads berdasarkan sistem operasi
         if sys.platform.startswith("win"):  # Windows
             downloads_folder = os.path.join(os.environ["USERPROFILE"], "Downloads")
@@ -126,16 +125,36 @@ class MainWindow(QMainWindow):
         else:
             downloads_folder = os.getcwd()  # Jika tidak dikenali, simpan di folder saat ini
         # Path lengkap untuk file Excel
-        file_path = os.path.join(downloads_folder, "searching_current_data.xlsx")
+        file_path = os.path.join(downloads_folder, f"searching_current_data_{search_date}.xlsx")
 
         df = pd.DataFrame(results_current, columns=[
-            "nama_lokasi", "rate", "jumlah_ulasan", "no_telepon", "email", "website", "alamat", "instagram", "facebook", "twitter", "linkedln", "youtube", "tiktok"
+            "nama_lokasi", "rate", "jumlah_ulasan", "no_telepon", "email", "website", "alamat", "instagram", "facebook", "twitter", "linkedln", "youtube", "tiktok", "link"
         ])
         # Simpan ke Excel
         df.to_excel(file_path, index=False)
         message = f"File berhasil disimpan di: {file_path}"
         self.success_download(message)
 
+    def download_by_id(self,id):
+        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        results_current = self.db.get_data_byid(id)
+        # Tentukan folder Downloads berdasarkan sistem operasi
+        if sys.platform.startswith("win"):  # Windows
+            downloads_folder = os.path.join(os.environ["USERPROFILE"], "Downloads")
+        elif sys.platform.startswith("linux") or sys.platform.startswith("darwin"):  # Linux & macOS
+            downloads_folder = os.path.join(os.environ["HOME"], "Downloads")
+        else:
+            downloads_folder = os.getcwd()  # Jika tidak dikenali, simpan di folder saat ini
+        # Path lengkap untuk file Excel
+        file_path = os.path.join(downloads_folder, f"data_{id}_{search_date}.xlsx")
+
+        df = pd.DataFrame(results_current, columns=[
+            "nama_lokasi", "rate", "jumlah_ulasan", "no_telepon", "email", "website", "alamat", "instagram", "facebook", "twitter", "linkedln", "youtube", "tiktok", "link"
+        ])
+        # Simpan ke Excel
+        df.to_excel(file_path, index=False)
+        message = f"File berhasil disimpan di: {file_path}"
+        self.success_download(message)
 
     def cancel_scrapping(self):
         print("cancel diklik")
