@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import subprocess
 from databasesqlite import databasesqlite
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton
 from PySide6.QtCore import Slot
 from ui_form import Ui_MainWindow
 from validateform import validateform
@@ -46,6 +46,8 @@ class MainWindow(QMainWindow):
         self.ui.btnSearch.clicked.connect(self.on_btn_search_clicked)
         self.ui.btnDownload.clicked.connect(self.download_current_result)
         self.ui.btnCancel.clicked.connect(self.cancel_scrapping)
+        self.ui.tableRiwayatPencarian.cellDoubleClicked.connect(self.on_table_double_click)
+
 
 
     def on_btn_search_clicked(self):
@@ -64,6 +66,52 @@ class MainWindow(QMainWindow):
             scraper = scrapping(self.ui)
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
             print("Form valid!")
+
+    def on_table_double_click(self, row, column):
+
+        if column == 0:
+            item = self.ui.tableRiwayatPencarian.item(row, column)
+            id = item.text()
+            print(id)
+            # Buat dialog
+            dlg = QDialog(self)
+            dlg.setWindowTitle("Detail Riwayat Pencarian")
+            dlg.setFixedSize(1000, 500)
+
+            # Header tabel
+            headers = [
+                "Nama Lokasi", "Rate", "Jumlah Ulasan", "Alamat", "Website", "No Telepon", "Link",
+                "Twitter", "TikTok", "Instagram", "Facebook", "YouTube", "LinkedIn", "Email"
+            ]
+
+            # Buat tabel
+            table = QTableWidget()
+            table.setStyleSheet("color:black; border: solid 1px rgb(255, 255, 255);")
+            table.setColumnCount(len(headers))
+            table.setRowCount(1)  # Hanya 1 baris dari data yang dipilih
+            table.setHorizontalHeaderLabels(headers)
+
+            # Isi data ke dalam tabel
+            for i in range(len(headers)):
+                item = self.ui.tableRiwayatPencarian.item(row, i)
+                if item:
+                    table.setItem(0, i, QTableWidgetItem(item.text()))
+
+            # Tombol Download (tanpa fungsi)
+            btn_download = QPushButton("Download")
+            btn_download.setStyleSheet("color:black; font-weight:bold;")
+
+            # Layout tombol di atas tabel
+            layout = QVBoxLayout()
+            btn_layout = QHBoxLayout()
+            btn_layout.addWidget(btn_download)
+
+            # Tambahkan ke layout utama
+            layout.addLayout(btn_layout)
+            layout.addWidget(table)
+            dlg.setLayout(layout)
+
+            dlg.exec()
 
     def download_current_result(self):
 
