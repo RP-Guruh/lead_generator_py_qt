@@ -11,14 +11,19 @@ from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from itertools import zip_longest
 from PySide6.QtWidgets import QMessageBox
-from PySide6.QtCore import QMetaObject, Qt, QObject, Slot
+from PySide6.QtCore import QMetaObject, Qt, QObject, Slot, Signal
+from tablehelper import TableHelper
 import time
 import threading
 import re
 
+
 class scrapping(QObject):
-    def __init__(self):
+    update_table_terkini = Signal()
+    def __init__(self, ui):
         super().__init__()
+        self.ui = ui
+        self.update_table_terkini.connect(self.test_signal)
         chrome_options = Options()
         # chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
@@ -64,6 +69,7 @@ class scrapping(QObject):
         msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
         msg.exec()
 
+
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
@@ -78,6 +84,13 @@ class scrapping(QObject):
         print("Scrapping selesai.")
         self.driver.quit()
         self.message_success()
+        self.update_table()
+
+
+    def update_table(self):
+        db = databasesqlite()
+        results = db.get_current_result()  # Panggil method dari databasesqlite
+        TableHelper.populate_table(self.ui.tableTerkini, results)
 
     def scrapping_process(self, driver, limit, delay):
         db = databasesqlite()
@@ -313,5 +326,7 @@ class scrapping(QObject):
             #simpan riwayat pencarian
         db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), self.search_date, self.results)
 
+    def test_signal(self):
+        print("✅ test_signal() terpanggil dari scrapping!")
 
 

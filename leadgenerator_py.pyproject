@@ -6,6 +6,7 @@
         "checkuuidos.py",
         "scrapping.py",
         "api.py",
-        "databasesqlite.py"
+        "databasesqlite.py",
+        "tablehelper.py"
     ]
 }

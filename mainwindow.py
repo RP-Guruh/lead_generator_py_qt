@@ -2,17 +2,20 @@
 import sys
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem
+from PySide6.QtCore import Slot
+from ui_form import Ui_MainWindow
+from validateform import validateform
+from scrapping import scrapping
+from tablehelper import TableHelper
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
 #     pyside6-uic form.ui -o ui_form.py, or
 #     pyside2-uic form.ui -o ui_form.py
-from ui_form import Ui_MainWindow
-from validateform import validateform
-from scrapping import scrapping
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
+
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -36,6 +39,7 @@ class MainWindow(QMainWindow):
 
         self.ui.btnSearch.clicked.connect(self.on_btn_search_clicked)
 
+
     def on_btn_search_clicked(self):
         #Tangkap input dari form
         bisnis_segmentasi = self.ui.inputBisnisSegmentasi.text()
@@ -49,7 +53,7 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            scraper = scrapping()
+            scraper = scrapping(self.ui)
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
 
             print("Form valid!")
@@ -63,21 +67,15 @@ class MainWindow(QMainWindow):
         msg.setStyleSheet("QLabel { color : black; } QPushButton { color : black; }")
         msg.exec()
 
+    def test_signal(self):
+        print("dipanggil dari signal")
+
+    @Slot()
     def load_results(self):
         results = self.db.get_current_result()  # Panggil method dari databasesqlite
+        TableHelper.populate_table(self.ui.tableTerkini, results)
 
         # Pastikan ada data untuk dimasukkan ke table
-        if not results:
-            return
-
-        # Update tableTerkini
-        self.ui.tableTerkini.setRowCount(len(results))
-        self.ui.tableTerkini.setColumnCount(len(results[0]))
-
-        for row_idx, row in enumerate(results):
-            for col_idx, value in enumerate(row):
-                item = QTableWidgetItem(str(value))  # Konversi ke string sebelum dimasukkan
-                self.ui.tableTerkini.setItem(row_idx, col_idx, item)
 
 
 
