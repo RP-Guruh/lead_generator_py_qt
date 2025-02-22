@@ -10,7 +10,7 @@ from databasesqlite import databasesqlite
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from itertools import zip_longest
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox, QApplication
 from PySide6.QtCore import QMetaObject, Qt, QObject, Slot, Signal
 from tablehelper import TableHelper
 import time
@@ -92,6 +92,7 @@ class scrapping(QObject):
         self.ui.btnCancel.setEnabled(False)
         self.ui.btnSearch.setEnabled(True)
         self.ui.btnDownload.setEnabled(True)
+        self.ui.progressBar.setValue(0)
 
 
     def update_table(self):
@@ -112,6 +113,7 @@ class scrapping(QObject):
         time.sleep(3)  # Beri waktu agar elemen pertama muncul
 
         while len(el_nama_lokasi) < limit:
+
             last_element = el_nama_lokasi[-1] if el_nama_lokasi else None
             if last_element:
                  self.driver.execute_script("arguments[0].scrollIntoView(true);", last_element)
@@ -135,6 +137,12 @@ class scrapping(QObject):
         el_rating = el_rating if el_rating else ["N/A"] * len(el_nama_lokasi)
         el_ulasan = el_ulasan if el_ulasan else ["N/A"] * len(el_nama_lokasi)
 
+        # inisaliasasi progress bar
+        total_lokasi = min(limit, len(el_nama_lokasi))  # Batas lokasi yang akan di-scrape
+        total_website = len(self.website_items)  # Jumlah website yang ditemukan untuk dikunjungi
+        total_steps = total_lokasi * 2 + total_website  # Semua langkah yang harus diselesaikan
+        progress_counter = 0  # Inisialisasi progress
+
         for i in range(min(limit, len(el_nama_lokasi))):
             nama = el_nama_lokasi[i].get_attribute("aria-label") if i < len(el_nama_lokasi) else "N/A"
             rating = el_rating[i].text if i < len(el_rating) else "N/A"
@@ -144,6 +152,10 @@ class scrapping(QObject):
             self.link_items.append(link)
             self.nama_lokasi.append(nama)
             print(f"{i+1}. {nama} | Rating: {rating} | Ulasan: {ulasan} | Link: {link}")
+            progress_counter += 1
+            progress = (progress_counter / total_steps) * 100
+            self.ui.progressBar.setValue(progress)
+            QApplication.processEvents()  # Agar UI tetap responsif
 
 
         for link in self.link_items:
@@ -192,6 +204,10 @@ class scrapping(QObject):
                 self.alamat_items.append(address_text)
                 self.no_telpon_items.append(phone_number)
                 self.website_items.append(website_official)
+                progress_counter += 1
+                progress = (progress_counter / total_steps) * 100
+                self.ui.progressBar.setValue(progress)
+                QApplication.processEvents()
 
             except Exception as e:
                 print(f"Error navigating to {link}: {e}")
@@ -308,6 +324,11 @@ class scrapping(QObject):
                 self.youtube_items.append(youtube_official)
                 self.linkedln_items.append(linkedln_official)
                 self.email_items.append(email_official)
+
+            progress_counter += 1
+            progress = (progress_counter / total_steps) * 100
+            self.ui.progressBar.setValue(progress)
+            QApplication.processEvents()
 
         self.driver.quit()
         for label, rating, ulasan, harga, alamat, website, no_telpon, link, instagram, facebook, twitter, youtube, email, linkedln, tiktok in zip_longest(

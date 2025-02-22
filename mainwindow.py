@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         # Atur ukuran default
         width = 1200
-        height = 670
+        height = 680
         self.setFixedSize(width, height)
 
         # Atur gambar logo lead generator
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.ui.btnDownload.clicked.connect(self.download_current_result)
         self.ui.btnCancel.clicked.connect(self.cancel_scrapping)
         self.ui.tableRiwayatPencarian.cellDoubleClicked.connect(self.on_table_double_click)
-
+        self.ui.progressBar.setValue(0)
 
 
     def on_btn_search_clicked(self):
