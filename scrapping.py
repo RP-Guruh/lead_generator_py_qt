@@ -150,7 +150,7 @@ class scrapping(QObject):
         # inisaliasasi progress bar
         total_lokasi = min(limit, len(el_nama_lokasi))  # Batas lokasi yang akan di-scrape
         total_website = len(self.website_items)  # Jumlah website yang ditemukan untuk dikunjungi
-        total_steps = total_lokasi * 2 + total_website  # Semua langkah yang harus diselesaikan
+        total_steps = total_lokasi * 3 + total_website  # Semua langkah yang harus diselesaikan
         progress_counter = 0  # Inisialisasi progress
 
         for i in range(min(limit, len(el_nama_lokasi))):

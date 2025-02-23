@@ -458,6 +458,14 @@ background-color: rgb(40, 32, 32)</string>
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">    border: 2px solid #5e5e5e;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    text-align: center;
+    color: black;
+    font-weight: bold;</string>
+    </property>
     <property name="value">
      <number>24</number>
     </property>

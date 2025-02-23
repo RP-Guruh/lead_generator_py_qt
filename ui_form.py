@@ -192,6 +192,12 @@ class Ui_MainWindow(object):
         self.progressBar = QProgressBar(self.centralwidget)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setGeometry(QRect(20, 610, 1161, 23))
+        self.progressBar.setStyleSheet(u"    border: 2px solid #5e5e5e;\n"
+"    border-radius: 5px;\n"
+"    background-color: #f0f0f0;\n"
+"    text-align: center;\n"
+"    color: black;\n"
+"    font-weight: bold;")
         self.progressBar.setValue(24)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
