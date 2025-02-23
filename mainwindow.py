@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self.ui.btnCancel.clicked.connect(self.cancel_scrapping)
         self.ui.tableRiwayatPencarian.cellDoubleClicked.connect(self.on_table_double_click)
         self.ui.progressBar.setValue(0)
-
+        self.ui.actionLogin.triggered.connect(self.login)
 
     def on_btn_search_clicked(self):
         #Tangkap input dari form
@@ -67,6 +67,8 @@ class MainWindow(QMainWindow):
             scraper = scrapping(self.ui)
             scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
 
+    def login(self):
+        print("login")
 
     def on_table_double_click(self, row, column):
 
