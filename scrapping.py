@@ -13,6 +13,7 @@ from itertools import zip_longest
 from PySide6.QtWidgets import QMessageBox, QApplication
 from PySide6.QtCore import QMetaObject, Qt, QObject, Slot, Signal
 from tablehelper import TableHelper
+import requests
 import time
 import threading
 import re
@@ -72,6 +73,15 @@ class scrapping(QObject):
         msg.setText("Pencarian data berhasil dilakukan")
         msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
         msg.exec()
+
+
+    def is_website_alive(self, url):
+        """Cek apakah website masih aktif atau tidak."""
+        try:
+            response = requests.get(url, timeout=10)
+            return response.status_code == 200
+        except requests.exceptions.RequestException:
+            return False
 
 
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
@@ -228,69 +238,56 @@ class scrapping(QObject):
                 self.jumlah_ulasan.append(element.text.replace("(", "").replace(")", ""))  # Hapus tanda kurung
 
         for url in self.website_items:
+            sosmed_results = {
+                "instagram": "",
+                "facebook": "",
+                "twitter": "",
+                "tiktok": "",
+                "youtube": "",
+                "linkedin": "",
+            }
+            email_official = ""
+
             if url == "not found":
                 print("Tidak ada website yang ditemukan")
-                instagram_official = ""
-                facebook_official = ""
-                twitter_official = ""
-                tiktok_official = ""
-                youtube_official = ""
-                linkedln_official = ""
-                email_official = ""
             else:
+                if not self.is_website_alive(url):
+                    print(f"Website {url} tidak aktif, melewati...")
+                    continue
+
                 try:
                     self.driver.get(url)
                     print(f"Masuk ke dalam website resmi: {url}")
 
-                    # Cari Instagram
                     try:
-                        instagram_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='instagram']")
-                        instagram_official = instagram_button.get_attribute("href")
-                        print(f"Instagram ditemukan: {instagram_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Instagram tidak ditemukan di halaman website resmi")
+                        WebDriverWait(self.driver, 5).until(
+                            EC.presence_of_element_located((By.TAG_NAME, "body"))
+                        )
+                    except TimeoutException:
+                        print(f"Website {url} terlalu lama loading, melewati...")
+                        continue
 
-                    # Cari Facebook
-                    try:
-                        facebook_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='facebook']")
-                        facebook_official = facebook_button.get_attribute("href")
-                        print(f"Facebook ditemukan: {facebook_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Facebook tidak ditemukan di halaman website resmi")
+                    # Pencarian Sosial Media
+                    social_media_links = {
+                        "instagram": "a[href*='instagram']",
+                        "facebook": "a[href*='facebook']",
+                        "twitter": "a[href*='twitter'], a[href*='x.com']",
+                        "tiktok": "a[href*='tiktok.com']",
+                        "youtube": "a[href*='youtube.com/channel']",
+                        "linkedin": "a[href*='linkedin.com']",
+                    }
 
-                    # Cari Twitter
-                    try:
-                        twitter_button = self.driver.find_element(By.CSS_SELECTOR, 'a[href*="twitter"], a[href*="x.com"]')
-                        twitter_official = twitter_button.get_attribute("href")
-                        print(f"Twitter ditemukan: {twitter_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Twitter tidak ditemukan di halaman website resmi")
+                    for key, selector in social_media_links.items():
+                        try:
+                            button = self.driver.find_element(By.CSS_SELECTOR, selector)
+                            link = button.get_attribute("href")
+                            if link:
+                                sosmed_results[key] = link
+                                print(f"{key.capitalize()} ditemukan: {link}")
+                        except (NoSuchElementException, TimeoutException):
+                            print(f"{key.capitalize()} tidak ditemukan di halaman website resmi")
 
-                    # Cari TikTok
-                    try:
-                        tiktok_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='tiktok.com']")
-                        tiktok_official = tiktok_button.get_attribute("href")
-                        print(f"TikTok ditemukan: {tiktok_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("TikTok tidak ditemukan di halaman website resmi")
-
-                    # Cari LinkedIn
-                    try:
-                        linkedin_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='linkedin.com']")
-                        linkedin_official = linkedin_button.get_attribute("href")
-                        print(f"LinkedIn ditemukan: {linkedin_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("LinkedIn tidak ditemukan di halaman website resmi")
-
-                    # Cari YouTube
-                    try:
-                        youtube_button = self.driver.find_element(By.CSS_SELECTOR, 'a[href*="youtube.com/channel"]')
-                        youtube_official = youtube_button.get_attribute("href")
-                        print(f"YouTube ditemukan: {youtube_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("YouTube tidak ditemukan di halaman website resmi")
-
-                    # Cari email
+                    # Cari Email
                     try:
                         emails_found = set()
                         email_xpath = "//a[starts-with(@href, 'mailto:')] | //p[contains(text(), '@')] | //span[contains(text(), '@')] | //div[contains(text(), '@')]"
@@ -301,29 +298,29 @@ class scrapping(QObject):
                             emails = set(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text))
                             emails_found.update(emails)
 
-                            email_official = ", ".join(emails_found) if emails_found else None
-                            if email_official:
-                                print(f"Email ditemukan: {email_official}")
-                            else:
-                                print("Email tidak ditemukan")
+                        email_official = ", ".join(emails_found) if emails_found else ""
+                        if email_official:
+                            print(f"Email ditemukan: {email_official}")
+                        else:
+                            print("Email tidak ditemukan")
 
                     except Exception as e:
-                                print(f"Terjadi kesalahan saat mencari email: {e}")
+                        print(f"Terjadi kesalahan saat mencari email: {e}")
 
                 except (TimeoutException, NoSuchElementException) as e:
                     print(f"Terjadi error saat memproses {url}: {e}")
                     continue
 
-                self.driver.back()
+                self.driver.back()  # Hanya kembali jika website aktif
+            # Simpan hasil ke dalam list
+            self.instagram_items.append(sosmed_results["instagram"])
+            self.facebook_items.append(sosmed_results["facebook"])
+            self.twitter_items.append(sosmed_results["twitter"])
+            self.tiktok_items.append(sosmed_results["tiktok"])
+            self.youtube_items.append(sosmed_results["youtube"])
+            self.linkedln_items.append(sosmed_results["linkedin"])
+            self.email_items.append(email_official)
 
-                # Simpan hasil
-                self.instagram_items.append(instagram_official)
-                self.facebook_items.append(facebook_official)
-                self.twitter_items.append(twitter_official)
-                self.tiktok_items.append(tiktok_official)
-                self.youtube_items.append(youtube_official)
-                self.linkedln_items.append(linkedln_official)
-                self.email_items.append(email_official)
 
             progress_counter += 1
             progress = (progress_counter / total_steps) * 100

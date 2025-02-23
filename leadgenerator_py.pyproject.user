@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 15.0.1, 2025-02-22T16:21:24. -->
+<!-- Written by QtCreator 15.0.1, 2025-02-22T22:21:10. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -293,7 +293,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">tablehelper.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/guruh/development/qt/python/leadgenerator_py/tablehelper.py</value>
-    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
+    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">/home/guruh/development/qt/python/leadgenerator_py/tablehelper.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
