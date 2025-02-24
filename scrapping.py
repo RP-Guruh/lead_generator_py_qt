@@ -10,14 +10,21 @@ from databasesqlite import databasesqlite
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from itertools import zip_longest
+from PySide6.QtWidgets import QMessageBox, QApplication
+from PySide6.QtCore import QMetaObject, Qt, QObject, Slot, Signal
+from tablehelper import TableHelper
+import requests
 import time
 import threading
 import re
-import json
 
 
-class scrapping:
-    def __init__(self):
+class scrapping(QObject):
+    update_table_terkini = Signal()
+    def __init__(self, ui):
+        super().__init__()
+        self.ui = ui
+        self.update_table_terkini.connect(self.test_signal)
         chrome_options = Options()
         # chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
@@ -44,11 +51,38 @@ class scrapping:
         self.geolokasiBisnis = None
 
     def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+        self.ui.btnCancel.setEnabled(True)
+        self.ui.btnSearch.setEnabled(False)
+        self.ui.btnDownload.setEnabled(False)
+
         self.bisnisSegmentasi = bisnis_segmentasi
         self.geolokasiBisnis = geolokasi
         #Jalankan scrapping di thread terpisah agar GUI tidak not responding
         thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian))
         thread.start()
+
+    def message_success(self):
+        # Panggil _show_message di UI thread dengan benar
+        QMetaObject.invokeMethod(self, "_show_message", Qt.QueuedConnection)
+
+    @Slot()
+    def _show_message(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Success")
+        msg.setText("Pencarian data berhasil dilakukan")
+        msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
+        msg.exec()
+
+
+    def is_website_alive(self, url):
+        """Cek apakah website masih aktif atau tidak."""
+        try:
+            response = requests.get(url, timeout=10)
+            return response.status_code == 200
+        except requests.exceptions.RequestException:
+            return False
+
 
     def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
@@ -63,6 +97,21 @@ class scrapping:
 
         print("Scrapping selesai.")
         self.driver.quit()
+        self.message_success()
+        self.update_table()
+        self.ui.btnCancel.setEnabled(False)
+        self.ui.btnSearch.setEnabled(True)
+        self.ui.btnDownload.setEnabled(True)
+        self.ui.progressBar.setValue(0)
+
+
+    def update_table(self):
+        db = databasesqlite()
+        results_current = db.get_current_result()
+        results_history = db.get_search_history()
+        TableHelper.populate_table(self.ui.tableTerkini, results_current)
+        TableHelper.populate_table(self.ui.tableRiwayatPencarian, results_history)
+
 
     def scrapping_process(self, driver, limit, delay):
         db = databasesqlite()
@@ -74,6 +123,7 @@ class scrapping:
         time.sleep(3)  # Beri waktu agar elemen pertama muncul
 
         while len(el_nama_lokasi) < limit:
+
             last_element = el_nama_lokasi[-1] if el_nama_lokasi else None
             if last_element:
                  self.driver.execute_script("arguments[0].scrollIntoView(true);", last_element)
@@ -97,6 +147,12 @@ class scrapping:
         el_rating = el_rating if el_rating else ["N/A"] * len(el_nama_lokasi)
         el_ulasan = el_ulasan if el_ulasan else ["N/A"] * len(el_nama_lokasi)
 
+        # inisaliasasi progress bar
+        total_lokasi = min(limit, len(el_nama_lokasi))  # Batas lokasi yang akan di-scrape
+        total_website = len(self.website_items)  # Jumlah website yang ditemukan untuk dikunjungi
+        total_steps = total_lokasi * 3 + total_website  # Semua langkah yang harus diselesaikan
+        progress_counter = 0  # Inisialisasi progress
+
         for i in range(min(limit, len(el_nama_lokasi))):
             nama = el_nama_lokasi[i].get_attribute("aria-label") if i < len(el_nama_lokasi) else "N/A"
             rating = el_rating[i].text if i < len(el_rating) else "N/A"
@@ -106,6 +162,10 @@ class scrapping:
             self.link_items.append(link)
             self.nama_lokasi.append(nama)
             print(f"{i+1}. {nama} | Rating: {rating} | Ulasan: {ulasan} | Link: {link}")
+            progress_counter += 1
+            progress = (progress_counter / total_steps) * 100
+            self.ui.progressBar.setValue(progress)
+            QApplication.processEvents()  # Agar UI tetap responsif
 
 
         for link in self.link_items:
@@ -154,6 +214,10 @@ class scrapping:
                 self.alamat_items.append(address_text)
                 self.no_telpon_items.append(phone_number)
                 self.website_items.append(website_official)
+                progress_counter += 1
+                progress = (progress_counter / total_steps) * 100
+                self.ui.progressBar.setValue(progress)
+                QApplication.processEvents()
 
             except Exception as e:
                 print(f"Error navigating to {link}: {e}")
@@ -174,69 +238,56 @@ class scrapping:
                 self.jumlah_ulasan.append(element.text.replace("(", "").replace(")", ""))  # Hapus tanda kurung
 
         for url in self.website_items:
+            sosmed_results = {
+                "instagram": "",
+                "facebook": "",
+                "twitter": "",
+                "tiktok": "",
+                "youtube": "",
+                "linkedin": "",
+            }
+            email_official = ""
+
             if url == "not found":
                 print("Tidak ada website yang ditemukan")
-                instagram_official = ""
-                facebook_official = ""
-                twitter_official = ""
-                tiktok_official = ""
-                youtube_official = ""
-                linkedln_official = ""
-                email_official = ""
             else:
+                if not self.is_website_alive(url):
+                    print(f"Website {url} tidak aktif, melewati...")
+                    continue
+
                 try:
                     self.driver.get(url)
                     print(f"Masuk ke dalam website resmi: {url}")
 
-                    # Cari Instagram
                     try:
-                        instagram_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='instagram']")
-                        instagram_official = instagram_button.get_attribute("href")
-                        print(f"Instagram ditemukan: {instagram_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Instagram tidak ditemukan di halaman website resmi")
+                        WebDriverWait(self.driver, 5).until(
+                            EC.presence_of_element_located((By.TAG_NAME, "body"))
+                        )
+                    except TimeoutException:
+                        print(f"Website {url} terlalu lama loading, melewati...")
+                        continue
 
-                    # Cari Facebook
-                    try:
-                        facebook_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='facebook']")
-                        facebook_official = facebook_button.get_attribute("href")
-                        print(f"Facebook ditemukan: {facebook_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Facebook tidak ditemukan di halaman website resmi")
+                    # Pencarian Sosial Media
+                    social_media_links = {
+                        "instagram": "a[href*='instagram']",
+                        "facebook": "a[href*='facebook']",
+                        "twitter": "a[href*='twitter'], a[href*='x.com']",
+                        "tiktok": "a[href*='tiktok.com']",
+                        "youtube": "a[href*='youtube.com/channel']",
+                        "linkedin": "a[href*='linkedin.com']",
+                    }
 
-                    # Cari Twitter
-                    try:
-                        twitter_button = self.driver.find_element(By.CSS_SELECTOR, 'a[href*="twitter"], a[href*="x.com"]')
-                        twitter_official = twitter_button.get_attribute("href")
-                        print(f"Twitter ditemukan: {twitter_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("Twitter tidak ditemukan di halaman website resmi")
+                    for key, selector in social_media_links.items():
+                        try:
+                            button = self.driver.find_element(By.CSS_SELECTOR, selector)
+                            link = button.get_attribute("href")
+                            if link:
+                                sosmed_results[key] = link
+                                print(f"{key.capitalize()} ditemukan: {link}")
+                        except (NoSuchElementException, TimeoutException):
+                            print(f"{key.capitalize()} tidak ditemukan di halaman website resmi")
 
-                    # Cari TikTok
-                    try:
-                        tiktok_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='tiktok.com']")
-                        tiktok_official = tiktok_button.get_attribute("href")
-                        print(f"TikTok ditemukan: {tiktok_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("TikTok tidak ditemukan di halaman website resmi")
-
-                    # Cari LinkedIn
-                    try:
-                        linkedin_button = self.driver.find_element(By.CSS_SELECTOR, f"a[href*='linkedin.com']")
-                        linkedin_official = linkedin_button.get_attribute("href")
-                        print(f"LinkedIn ditemukan: {linkedin_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("LinkedIn tidak ditemukan di halaman website resmi")
-
-                    # Cari YouTube
-                    try:
-                        youtube_button = self.driver.find_element(By.CSS_SELECTOR, 'a[href*="youtube.com/channel"]')
-                        youtube_official = youtube_button.get_attribute("href")
-                        print(f"YouTube ditemukan: {youtube_official}")
-                    except (NoSuchElementException, TimeoutException):
-                        print("YouTube tidak ditemukan di halaman website resmi")
-
-                    # Cari email
+                    # Cari Email
                     try:
                         emails_found = set()
                         email_xpath = "//a[starts-with(@href, 'mailto:')] | //p[contains(text(), '@')] | //span[contains(text(), '@')] | //div[contains(text(), '@')]"
@@ -247,29 +298,34 @@ class scrapping:
                             emails = set(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text))
                             emails_found.update(emails)
 
-                            email_official = ", ".join(emails_found) if emails_found else None
-                            if email_official:
-                                print(f"Email ditemukan: {email_official}")
-                            else:
-                                print("Email tidak ditemukan")
+                        email_official = ", ".join(emails_found) if emails_found else ""
+                        if email_official:
+                            print(f"Email ditemukan: {email_official}")
+                        else:
+                            print("Email tidak ditemukan")
 
                     except Exception as e:
-                                print(f"Terjadi kesalahan saat mencari email: {e}")
+                        print(f"Terjadi kesalahan saat mencari email: {e}")
 
                 except (TimeoutException, NoSuchElementException) as e:
                     print(f"Terjadi error saat memproses {url}: {e}")
                     continue
 
-                self.driver.back()
+                self.driver.back()  # Hanya kembali jika website aktif
+            # Simpan hasil ke dalam list
+            self.instagram_items.append(sosmed_results["instagram"])
+            self.facebook_items.append(sosmed_results["facebook"])
+            self.twitter_items.append(sosmed_results["twitter"])
+            self.tiktok_items.append(sosmed_results["tiktok"])
+            self.youtube_items.append(sosmed_results["youtube"])
+            self.linkedln_items.append(sosmed_results["linkedin"])
+            self.email_items.append(email_official)
 
-                # Simpan hasil
-                self.instagram_items.append(instagram_official)
-                self.facebook_items.append(facebook_official)
-                self.twitter_items.append(twitter_official)
-                self.tiktok_items.append(tiktok_official)
-                self.youtube_items.append(youtube_official)
-                self.linkedln_items.append(linkedln_official)
-                self.email_items.append(email_official)
+
+            progress_counter += 1
+            progress = (progress_counter / total_steps) * 100
+            self.ui.progressBar.setValue(progress)
+            QApplication.processEvents()
 
         self.driver.quit()
         for label, rating, ulasan, harga, alamat, website, no_telpon, link, instagram, facebook, twitter, youtube, email, linkedln, tiktok in zip_longest(
@@ -295,8 +351,9 @@ class scrapping:
                 "email": email
             })
 
-            #simpan riwayat pencarian
-        db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), self.search_date, self.results)
+        jumlah_valid_results = sum(1 for result in self.results if result.get("nama_lokasi"))
+        #simpan riwayat pencarian
+        db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), jumlah_valid_results, self.search_date, self.results)
 
-
-
+    def test_signal(self):
+        print("✅ test_signal() terpanggil dari scrapping!")

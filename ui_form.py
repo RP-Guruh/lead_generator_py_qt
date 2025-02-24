@@ -18,14 +18,14 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHeaderView, QLabel,
     QLineEdit, QMainWindow, QMenu, QMenuBar,
-    QPushButton, QSizePolicy, QStatusBar, QTabWidget,
-    QTableWidget, QTableWidgetItem, QWidget)
+    QProgressBar, QPushButton, QSizePolicy, QStatusBar,
+    QTabWidget, QTableWidget, QTableWidgetItem, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1200, 670)
+        MainWindow.resize(1200, 695)
         MainWindow.setStyleSheet(u"background-color:white;")
         self.actionLogin = QAction(MainWindow)
         self.actionLogin.setObjectName(u"actionLogin")
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setStyleSheet(u"font-weight:bold;\n"
 "color:white;\n"
 "border-color: rgb(255, 255, 255);\n"
-"background-color: rgb(40, 32, 32)")
+"background-color: rgb(54, 54, 54)")
         self.tab = QWidget()
         self.tab.setObjectName(u"tab")
         self.tableTerkini = QTableWidget(self.tab)
@@ -156,6 +156,30 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
+        self.tableRiwayatPencarian = QTableWidget(self.tab_2)
+        if (self.tableRiwayatPencarian.columnCount() < 7):
+            self.tableRiwayatPencarian.setColumnCount(7)
+        __qtablewidgetitem15 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(0, __qtablewidgetitem15)
+        __qtablewidgetitem16 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(1, __qtablewidgetitem16)
+        __qtablewidgetitem17 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(2, __qtablewidgetitem17)
+        __qtablewidgetitem18 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(3, __qtablewidgetitem18)
+        __qtablewidgetitem19 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(4, __qtablewidgetitem19)
+        __qtablewidgetitem20 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(5, __qtablewidgetitem20)
+        __qtablewidgetitem21 = QTableWidgetItem()
+        self.tableRiwayatPencarian.setHorizontalHeaderItem(6, __qtablewidgetitem21)
+        if (self.tableRiwayatPencarian.rowCount() < 2):
+            self.tableRiwayatPencarian.setRowCount(2)
+        self.tableRiwayatPencarian.setObjectName(u"tableRiwayatPencarian")
+        self.tableRiwayatPencarian.setGeometry(QRect(10, 10, 1131, 211))
+        self.tableRiwayatPencarian.setStyleSheet(u"border: solid 1px rgb(255, 255, 255);\n"
+"")
+        self.tableRiwayatPencarian.setFrameShape(QFrame.Shape.Panel)
         self.tabWidget.addTab(self.tab_2, "")
         self.btnDownload = QPushButton(self.centralwidget)
         self.btnDownload.setObjectName(u"btnDownload")
@@ -163,13 +187,30 @@ class Ui_MainWindow(object):
         self.btnDownload.setStyleSheet(u"color:black;\n"
 "color: rgb(14, 1, 1);\n"
 "font-weight:bold;")
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setGeometry(QRect(20, 610, 1161, 21))
+        self.progressBar.setStyleSheet(u"QProgressBar {\n"
+"   border: 2px solid #5e5e5e;\n"
+"   border-radius: 5px; \n"
+"   background-color: rgb(56, 56, 56);\n"
+"   text-align: center;\n"
+"   color: white;\n"
+"   font-weight: bold;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"	background-color: rgb(0, 99, 204);\n"
+"}\n"
+"")
+        self.progressBar.setValue(24)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 1200, 21))
         self.menubar.setStyleSheet(u"color:white;\n"
 "font-weight:bold;\n"
-"background-color: rgb(6, 37, 210);")
+"background-color: rgb(0, 99, 204);")
         self.menuAccount = QMenu(self.menubar)
         self.menuAccount.setObjectName(u"menuAccount")
         MainWindow.setMenuBar(self.menubar)
@@ -183,7 +224,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -227,13 +268,23 @@ class Ui_MainWindow(object):
 
         __sortingEnabled = self.tableTerkini.isSortingEnabled()
         self.tableTerkini.setSortingEnabled(False)
-        ___qtablewidgetitem12 = self.tableTerkini.item(0, 0)
-        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"Hotel Indonesia", None));
-        ___qtablewidgetitem13 = self.tableTerkini.item(0, 1)
-        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"1", None));
         self.tableTerkini.setSortingEnabled(__sortingEnabled)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Hasil Terkini", None))
+        ___qtablewidgetitem12 = self.tableRiwayatPencarian.horizontalHeaderItem(0)
+        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"ID", None));
+        ___qtablewidgetitem13 = self.tableRiwayatPencarian.horizontalHeaderItem(1)
+        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"Bisnis Segmentasi", None));
+        ___qtablewidgetitem14 = self.tableRiwayatPencarian.horizontalHeaderItem(2)
+        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"Geolokasi", None));
+        ___qtablewidgetitem15 = self.tableRiwayatPencarian.horizontalHeaderItem(3)
+        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"Limit Pencarian", None));
+        ___qtablewidgetitem16 = self.tableRiwayatPencarian.horizontalHeaderItem(4)
+        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"Jumlah didapat", None));
+        ___qtablewidgetitem17 = self.tableRiwayatPencarian.horizontalHeaderItem(5)
+        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"Delay (detik)", None));
+        ___qtablewidgetitem18 = self.tableRiwayatPencarian.horizontalHeaderItem(6)
+        ___qtablewidgetitem18.setText(QCoreApplication.translate("MainWindow", u"Tanggal Pencarian", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Riwayat Pencarian", None))
         self.btnDownload.setText(QCoreApplication.translate("MainWindow", u"Download", None))
         self.menuAccount.setTitle(QCoreApplication.translate("MainWindow", u"Account", None))

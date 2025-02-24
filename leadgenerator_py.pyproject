@@ -5,6 +5,7 @@
         "validateform.py",
         "checkuuidos.py",
         "scrapping.py",
-        "databasesqlite.py"
+        "databasesqlite.py",
+        "tablehelper.py"
     ]
 }
