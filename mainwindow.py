@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setValue(0)
         self.ui.progressBar.setMaximum(100)
         self.ui.actionLogin.triggered.connect(self.login)
+        self.ui.actionLogout.triggered.connect(self.logout)
 
         #modifikasi button
         style_button = """
@@ -163,13 +164,80 @@ class MainWindow(QMainWindow):
         register_label.linkActivated.connect(self.open_register_page)
         layout.addWidget(register_label)
 
-
-
-
-
         layout.addStretch()  # Tambahkan stretch di atas agar logo terdorong ke atas
         dlg.setLayout(layout)
         dlg.exec()
+
+    def logout(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Sign Out")
+        dlg.setFixedSize(300, 100)
+
+        # Layout utama
+        layout = QVBoxLayout()
+
+        # Pesan konfirmasi
+        message = QLabel("Anda yakin ingin logout?")
+        message.setStyleSheet("color:black;")
+        layout.addWidget(message)
+
+        # Layout untuk tombol
+        button_layout = QHBoxLayout()
+
+        # Tombol "Ya"
+        yes_button = QPushButton("Ya")
+        yes_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(0, 99, 204);
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(0, 130, 255);
+                color: white;
+            }
+            QPushButton:pressed {
+                background-color: rgb(0, 80, 180); /* Lebih gelap saat ditekan */
+            }
+        """)
+
+        yes_button.clicked.connect(dlg.accept)  # Menutup dialog dengan status 'Accepted'
+
+        # Tombol "Cancel"
+        cancel_button = QPushButton("Cancel")
+
+        cancel_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(150, 150, 150);
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(170, 170, 170); /* Sedikit lebih terang saat hover */
+            }
+            QPushButton:pressed {
+                background-color: rgb(120, 120, 120); /* Lebih gelap saat ditekan */
+            }
+        """)
+
+        cancel_button.clicked.connect(dlg.reject)  # Menutup dialog dengan status 'Rejected'
+
+        # Tambahkan tombol ke layout horizontal
+        button_layout.addWidget(yes_button)
+        button_layout.addWidget(cancel_button)
+
+        # Tambahkan semua layout ke dalam dialog
+        layout.addLayout(button_layout)
+        dlg.setLayout(layout)
+
+        # Tampilkan dialog dan cek hasilnya
+        if dlg.exec() == QDialog.Accepted:
+            print("User logged out!")  # Tambahkan aksi logout di sini
+
 
     def cancel_scrapping(self):
         print("cancel diklik")
