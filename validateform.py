@@ -44,3 +44,14 @@ class validateform:
             return False, pesan
 
         return True, "Validasi berhasil!"
+
+    def validate_login_form(email, password):
+        if not email:
+            pesan = "Email tidak boleh kosong"
+            return False, pesan
+
+        if not password:
+            pesan = "Password tidak boleh kosong"
+            return False, pesan
+
+        return True, "Validasi berhasil!"

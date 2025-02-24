@@ -153,6 +153,8 @@ class MainWindow(QMainWindow):
             }
         """)
         layout.addWidget(login_button)
+        login_button.clicked.connect(lambda: self.login_process(email_input, password_input))
+
 
         # Link "Belum mendaftar?"
         register_label = QLabel('<a style="color:rgb(0, 99, 204);" href="https://goremote.id/leads-generator/">Belum mendaftar?</a>')
@@ -238,6 +240,21 @@ class MainWindow(QMainWindow):
         if dlg.exec() == QDialog.Accepted:
             print("User logged out!")  # Tambahkan aksi logout di sini
 
+
+    def login_process(self, email, password):
+        #validasi email dan password harus diisi
+        email = email.text()
+        password = password.text()
+
+        is_valid, message = validateform.validate_login_form(email, password)
+
+        # Menampilkan pesan hasil validasi
+        if not is_valid:
+            self.show_error(message)
+        else:
+            print(email)
+            print(password)
+            print("login di proses")
 
     def cancel_scrapping(self):
         print("cancel diklik")
