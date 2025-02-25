@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self.ui.btnCancel.setEnabled(False)
 
         # API INSTANCE
-        self.api_instance = API()
+        self.api_instance = API(self.ui)
 
         # Simpan koneksi database
         # Buat objek databasesqlite dengan QObject

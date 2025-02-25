@@ -61,7 +61,8 @@
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">color:black</string>
+      <string notr="true">font-weight: bold;
+color:black</string>
      </property>
      <property name="text">
       <string>Status : </string>
@@ -70,17 +71,17 @@
     <widget class="QLabel" name="lblStatusLogin">
      <property name="geometry">
       <rect>
-       <x>50</x>
+       <x>60</x>
        <y>10</y>
-       <width>61</width>
+       <width>171</width>
        <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">color:black</string>
+      <string notr="true">color:blue</string>
      </property>
      <property name="text">
-      <string>Not login</string>
+      <string/>
      </property>
     </widget>
    </widget>

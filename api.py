@@ -2,13 +2,16 @@ import requests
 import json
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import QObject
 
-class API:
+class API(QObject):
     URLAPI = "https://lead-generator.goremote.id/api"
 
-    def __init__(self):
-        self.database = databasesqlite()  # Inisialisasi database
-        self.logger = self.get_logger()  # Inisialisasi logger
+    def __init__(self, ui):
+        super().__init__()
+        self.database = databasesqlite()
+        self.logger = self.get_logger()
+        self.ui = ui
 
     def get_logger(self):
         """Fungsi dummy logger untuk menghindari error jika logger belum tersedia"""
@@ -54,6 +57,7 @@ class API:
 
                 self.logger.log_info("Login berhasil")
                 self.show_message("Login Berhasil", f"Selamat datang, {data['user']['name']}!", QMessageBox.Information)
+                self.ui.lblStatusLogin.setText("You logged in")
 
             elif response.status_code == 401:
                 # Login gagal (email/password salah)
@@ -111,6 +115,7 @@ class API:
 
                 self.logger.log_info("Logout berhasil")
                 self.show_message("Logout Berhasil", "Anda telah logout.", QMessageBox.Information)
+                self.ui.lblStatusLogin.setText("Logged out")
 
             elif response.status_code == 401:
                 error_message = "Logout gagal, harap ulangi kembali"
