@@ -174,3 +174,44 @@ class databasesqlite(QObject):
             print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
             return []
 
+    def save_session_login(self, user_id, token, name, email, is_login):
+        """Menyimpan sesi login ke database SQLite"""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("""
+            INSERT INTO session_login (id_user, token, name, email, is_login)
+            VALUES (?, ?, ?, ?, ?)
+            """, (user_id, token, name, email, is_login))
+
+            self.conn.commit()  # Simpan perubahan
+            print(f"Login berhasil! Selamat datang, {name}")
+
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+
+    def get_session(self):
+        try:
+            cursor = self.conn.cursor()
+
+            # Ambil data berdasarkan id_histories
+            cursor.execute('SELECT token FROM session_login LIMIT 1')
+            rows = cursor.fetchone()
+
+            return rows
+
+        except sqlite3.Error as e:
+            print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
+            return []
+
+    def delete_session(self):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE from session_login")
+
+            self.conn.commit()  # Simpan perubahan
+            print("Logout berhasil! Sampai jumpa")
+
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+
+

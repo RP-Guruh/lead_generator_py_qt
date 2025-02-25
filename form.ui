@@ -51,6 +51,38 @@
       <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>41</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color:black</string>
+     </property>
+     <property name="text">
+      <string>Status : </string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblStatusLogin">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>10</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color:black</string>
+     </property>
+     <property name="text">
+      <string>Not login</string>
+     </property>
+    </widget>
    </widget>
    <widget class="Line" name="line">
     <property name="geometry">

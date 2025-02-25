@@ -2,17 +2,17 @@
 import sys
 import pandas as pd
 import os
-import subprocess
 import webbrowser
 from datetime import datetime
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton, QLabel, QFrame, QLineEdit, QHBoxLayout
-from PySide6.QtGui import QPixmap, QFont
+from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Slot, Qt
 from ui_form import Ui_MainWindow
 from validateform import validateform
 from scrapping import scrapping
 from tablehelper import TableHelper
+from api import API
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -30,6 +30,9 @@ class MainWindow(QMainWindow):
 
         # disabled tombol cancel
         self.ui.btnCancel.setEnabled(False)
+
+        # API INSTANCE
+        self.api_instance = API()
 
         # Simpan koneksi database
         # Buat objek databasesqlite dengan QObject
@@ -153,8 +156,8 @@ class MainWindow(QMainWindow):
             }
         """)
         layout.addWidget(login_button)
-        login_button.clicked.connect(lambda: self.login_process(email_input, password_input))
-
+        #login_button.clicked.connect(lambda: self.login_process(email_input, password_input))
+        login_button.clicked.connect(dlg.accept)
 
         # Link "Belum mendaftar?"
         register_label = QLabel('<a style="color:rgb(0, 99, 204);" href="https://goremote.id/leads-generator/">Belum mendaftar?</a>')
@@ -168,7 +171,9 @@ class MainWindow(QMainWindow):
 
         layout.addStretch()  # Tambahkan stretch di atas agar logo terdorong ke atas
         dlg.setLayout(layout)
-        dlg.exec()
+        # Tampilkan dialog dan cek hasilnya
+        if dlg.exec() == QDialog.Accepted:
+            self.login_process(email_input, password_input)
 
     def logout(self):
         dlg = QDialog(self)
@@ -238,7 +243,7 @@ class MainWindow(QMainWindow):
 
         # Tampilkan dialog dan cek hasilnya
         if dlg.exec() == QDialog.Accepted:
-            print("User logged out!")  # Tambahkan aksi logout di sini
+            self.logout_process()
 
 
     def login_process(self, email, password):
@@ -252,9 +257,11 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            print(email)
-            print(password)
-            print("login di proses")
+            self.api_instance.login_api(email, password)
+
+
+    def logout_process(self):
+        self.api_instance.logout_api()
 
     def cancel_scrapping(self):
         print("cancel diklik")
