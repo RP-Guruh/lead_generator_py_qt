@@ -10,9 +10,9 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Slot, Qt
 from ui_form import Ui_MainWindow
 from validateform import validateform
-from scrapping import scrapping
 from tablehelper import TableHelper
 from api import API
+from checkuuidos import checkuuidos
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -33,12 +33,17 @@ class MainWindow(QMainWindow):
 
         # API INSTANCE
         self.api_instance = API(self.ui)
+        self.uuidos = checkuuidos()
 
         # Simpan koneksi database
         # Buat objek databasesqlite dengan QObject
         self.db = databasesqlite()
         self.load_results()
-
+        self.is_login = self.db.get_session()
+        if self.is_login == None:
+            self.ui.lblStatusLogin.setText("Not logged in")
+        else:
+            self.ui.lblStatusLogin.setText("Logged in")
         # Atur ukuran default
         width = 1200
         height = 690
@@ -97,8 +102,8 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            scraper = scrapping(self.ui)
-            scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
+            uuid = self.uuidos.generate_uuid()
+            self.api_instance.check_limit(uuid, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
 
     def login(self):
         dlg = QDialog(self)

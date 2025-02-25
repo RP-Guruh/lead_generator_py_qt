@@ -352,8 +352,13 @@ class scrapping(QObject):
             })
 
         jumlah_valid_results = sum(1 for result in self.results if result.get("nama_lokasi"))
-        #simpan riwayat pencarian
+        #simpan riwayat pencarian db lokal
         db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), jumlah_valid_results, self.search_date, self.results)
+        #simpan riwayat pencarian ke api
+        from api import API
+        api_instance = API(self.ui)
+        api_instance.simpan_riwayat_pencarian(self.results)
+
 
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")

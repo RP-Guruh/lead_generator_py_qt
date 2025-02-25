@@ -3,6 +3,8 @@ import json
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QObject
+from scrapping import scrapping
+import webbrowser
 
 class API(QObject):
     URLAPI = "https://lead-generator.goremote.id/api"
@@ -12,6 +14,8 @@ class API(QObject):
         self.database = databasesqlite()
         self.logger = self.get_logger()
         self.ui = ui
+        self.id_simpan_request = None
+
 
     def get_logger(self):
         """Fungsi dummy logger untuk menghindari error jika logger belum tersedia"""
@@ -145,5 +149,62 @@ class API(QObject):
             error_message = f"An unexpected error occurred during logout: {str(e)}"
             self.logger.log_error(error_message)
             self.show_message("Error", error_message, QMessageBox.Critical)
+
+    def check_limit(self, uuid, bisnis_segmentasi, geolokasi, request_quota, delay_pencarian):
+
+        # kita cek dulu dia sudah login atau belum
+        session = self.database.get_session()
+        token = session[0] if session else None
+        # kalau sudah login artinya dia sudah punya akun dan mendaftar jadinya ngecek pakai limit berlangganan bukan dari uuid
+        if token:
+            url = f"{self.URLAPI}/search/request"
+            payload = {
+                "query": bisnis_segmentasi,
+                "place": geolokasi,
+                "request_quota": request_quota
+            }
+            try:
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}"
+                }
+                response = requests.post(url, json=payload, headers=headers, timeout=10)
+                data = response.json()
+                # Cek apakah limit masih cukup
+
+                # limit gak cukup alias udah abis
+                if response.status_code == 402:
+                    if data['data']['sisa_quota'] < 0:
+                        title = "Paket Anda Telah Berakhir"
+                        pesan = "Masa aktif paket Anda telah habis. Silakan perpanjang langganan untuk terus menggunakan layanan."
+                    else:
+                        title = 'Kuota Hampir Habis!'
+                        pesan = (f"Kuota Anda tersisa {data['data']['sisa_quota']} data. "
+                                 "Tambahkan kuota untuk dapat mengakses lebih banyak data.")
+                    self.show_message(title, pesan, QMessageBox.Critical)
+                    webbrowser.open("https://goremote.id/leads-generator/")
+
+                if response.status_code == 200:
+                    self.id_simpan_request = data["data"]["id"]
+                    print(self.id_simpan_request)
+                    #jalanin scrapping disini
+                    #scraper = scrapping(self.ui)
+                    #scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian)
+
+            except Exception as e:
+                print(e)
+        else:
+            print("kita cek dari uuid")
+            #belum login berarti check dari uuid
+
+
+    def simpan_riwayat_pencarian(self, hasil_didapat):
+        url = f"{self.URLAPI}/search/response"
+        payload = {
+          "id": self.id_simpan_request,
+          "response_quota": hasil_didapat
+        }
+
+
 
 
