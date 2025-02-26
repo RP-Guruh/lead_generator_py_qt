@@ -72,6 +72,16 @@ class MainWindow(QMainWindow):
         self.ui.actionLogout.triggered.connect(self.logout)
 
         #modifikasi button
+        style_button_disabled = """
+        QPushButton:disabled {
+            background-color: #A0A0A0; /* Abu-abu pudar */
+            color: #E0E0E0; /* Teks lebih redup */
+            border: 2px solid #909090; /* Batas lebih soft */
+            border-radius: 8px; /* Tetap mempertahankan rounded corners */
+            box-shadow: none; /* Hilangkan efek bayangan */
+        }
+        """
+
         style_button = """
         QPushButton {
             background-color: #0078D7;
@@ -95,7 +105,7 @@ class MainWindow(QMainWindow):
         """
         self.ui.btnDownload.setStyleSheet(style_button)
         self.ui.btnSearch.setStyleSheet(style_button)
-        self.ui.btnCancel.setStyleSheet(style_button)
+        self.ui.btnCancel.setStyleSheet(style_button_disabled)
 
 
 
@@ -280,7 +290,7 @@ class MainWindow(QMainWindow):
         self.api_instance.logout_api()
 
     def cancel_scrapping(self):
-        print("cancel diklik")
+        self.api_instance.cancel_process()
 
     def open_register_page(self, link):
         webbrowser.open(link)
@@ -313,8 +323,29 @@ class MainWindow(QMainWindow):
             TableHelper.populate_table(table, results)
 
             # Tombol Download (tanpa fungsi)
+            style_button = """
+            QPushButton {
+                background-color: #0078D7;
+                color: white;
+                border-radius: 8px;
+                padding: 8px 18px;
+                font-size: 13px;
+                font-weight: bold;
+                border: 2px solid #005A9E;
+                box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+            }
+            QPushButton:hover {
+                background-color: #005A9E;
+                border: 2px solid #003F73;
+            }
+            QPushButton:pressed {
+                background-color: #004A8F;
+                border: 2px solid #002F5E;
+                box-shadow: none;
+            }
+            """
             btn_download = QPushButton("Download")
-            btn_download.setStyleSheet("color:white; font-weight:bold; background-color: blue;")
+            btn_download.setStyleSheet(style_button)
             btn_download.clicked.connect(lambda: self.download_by_id(id))
 
 

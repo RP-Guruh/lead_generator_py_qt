@@ -17,7 +17,11 @@ import requests
 import time
 import threading
 import re
-
+import subprocess
+import signal
+import sys
+import time
+import os
 
 class scrapping(QObject):
     update_table_terkini = Signal()
@@ -26,7 +30,7 @@ class scrapping(QObject):
         self.ui = ui
         self.update_table_terkini.connect(self.test_signal)
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")  # Mode headless (opsional)
+        chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=self.service, options=chrome_options)
         self.nama_lokasi = []
@@ -51,9 +55,44 @@ class scrapping(QObject):
         self.geolokasiBisnis = None
 
     def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat):
+        style_button_disabled = """
+        QPushButton:disabled {
+            background-color: #A0A0A0; /* Abu-abu pudar */
+            color: #E0E0E0; /* Teks lebih redup */
+            border: 2px solid #909090; /* Batas lebih soft */
+            border-radius: 8px; /* Tetap mempertahankan rounded corners */
+            box-shadow: none; /* Hilangkan efek bayangan */
+        }
+        """
+        style_button = """
+        QPushButton {
+            background-color: #0078D7;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 2px solid #005A9E;
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:hover {
+            background-color: #005A9E;
+            border: 2px solid #003F73;
+        }
+        QPushButton:pressed {
+            background-color: #004A8F;
+            border: 2px solid #002F5E;
+            box-shadow: none;
+        }
+        """
+
         self.ui.btnCancel.setEnabled(True)
         self.ui.btnSearch.setEnabled(False)
         self.ui.btnDownload.setEnabled(False)
+
+        self.ui.btnSearch.setStyleSheet(style_button_disabled)
+        self.ui.btnDownload.setStyleSheet(style_button_disabled)
+        self.ui.btnCancel.setStyleSheet(style_button)
 
         self.bisnisSegmentasi = bisnis_segmentasi
         self.geolokasiBisnis = geolokasi
@@ -73,7 +112,6 @@ class scrapping(QObject):
         msg.setText("Pencarian data berhasil dilakukan")
         msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
         msg.exec()
-
 
     def is_website_alive(self, url):
         """Cek apakah website masih aktif atau tidak."""
@@ -102,6 +140,42 @@ class scrapping(QObject):
         self.ui.btnCancel.setEnabled(False)
         self.ui.btnSearch.setEnabled(True)
         self.ui.btnDownload.setEnabled(True)
+
+        #modifikasi button
+        style_button_disabled = """
+        QPushButton:disabled {
+            background-color: #A0A0A0; /* Abu-abu pudar */
+            color: #E0E0E0; /* Teks lebih redup */
+            border: 2px solid #909090; /* Batas lebih soft */
+            border-radius: 8px; /* Tetap mempertahankan rounded corners */
+            box-shadow: none; /* Hilangkan efek bayangan */
+        }
+        """
+        style_button = """
+        QPushButton {
+            background-color: #0078D7;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 2px solid #005A9E;
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:hover {
+            background-color: #005A9E;
+            border: 2px solid #003F73;
+        }
+        QPushButton:pressed {
+            background-color: #004A8F;
+            border: 2px solid #002F5E;
+            box-shadow: none;
+        }
+        """
+        self.ui.btnDownload.setStyleSheet(style_button)
+        self.ui.btnSearch.setStyleSheet(style_button)
+        self.ui.btnCancel.setStyleSheet(style_button_disabled)
+
         self.ui.progressBar.setValue(0)
 
 
@@ -368,6 +442,82 @@ class scrapping(QObject):
             from api import API
             api_instance = API(self.ui)
             api_instance.update_limit_guest(jumlah_valid_results)
+
+    def cancel(self):
+        """Menutup Selenium dan memastikan ChromeDriver benar-benar berhenti di Windows, Linux, atau macOS."""
+        if self.driver:
+            try:
+                self.driver.quit()  # Tutup browser Selenium
+                self.driver = None  # Hapus referensi driver
+            except Exception as e:
+                print(f"Error saat menutup Selenium: {e}")
+
+        # Tunggu sebentar untuk memastikan driver berhenti
+        time.sleep(1)
+
+        # Deteksi OS dan gunakan perintah yang sesuai
+        if sys.platform.startswith("win"):  # Windows
+            try:
+                subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print("ChromeDriver berhasil dihentikan di Windows.")
+            except Exception as e:
+                print(f"Error saat mematikan ChromeDriver di Windows: {e}")
+
+        else:  # Linux / macOS
+            try:
+                subprocess.run(["pkill", "-f", "chromedriver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print("ChromeDriver berhasil dihentikan di Linux/macOS.")
+            except Exception as e:
+                print(f"Error saat mematikan ChromeDriver di Linux/macOS: {e}")
+
+        # Reset UI
+        self.ui.progressBar.setValue(0)
+        self.ui.btnCancel.setEnabled(False)
+        self.ui.btnSearch.setEnabled(True)
+        self.ui.btnDownload.setEnabled(True)
+
+        #modifikasi button
+        style_button_disabled = """
+        QPushButton:disabled {
+            background-color: #A0A0A0; /* Abu-abu pudar */
+            color: #E0E0E0; /* Teks lebih redup */
+            border: 2px solid #909090; /* Batas lebih soft */
+            border-radius: 8px; /* Tetap mempertahankan rounded corners */
+            box-shadow: none; /* Hilangkan efek bayangan */
+        }
+        """
+
+        style_button = """
+        QPushButton {
+            background-color: #0078D7;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 2px solid #005A9E;
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:hover {
+            background-color: #005A9E;
+            border: 2px solid #003F73;
+        }
+        QPushButton:pressed {
+            background-color: #004A8F;
+            border: 2px solid #002F5E;
+            box-shadow: none;
+        }
+        """
+        self.ui.btnDownload.setStyleSheet(style_button)
+        self.ui.btnSearch.setStyleSheet(style_button)
+        self.ui.btnCancel.setStyleSheet(style_button_disabled)
+
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Cancel")
+        msg.setText("Pencarian data dibatalkan")
+        msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
+        msg.exec()
 
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")

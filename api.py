@@ -370,6 +370,8 @@ class API(QObject):
         except requests.exceptions.RequestException as err:
             print(f"Unexpected Error: {err}")
 
-
+    def cancel_process(self):
+        scraper = scrapping(self.ui)
+        scraper.cancel()
 
 
