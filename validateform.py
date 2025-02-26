@@ -8,15 +8,9 @@ class validateform:
         if not bisnis_val:
             pesan = "Bisnis segmentasi tidak boleh kosong"
             return False, pesan
-        if not bisnis_val.replace(" ", "").isalpha():
-            pesan = "Bisnis segmentasi harus berupa huruf"
-            return False, pesan
 
         if not geolokasi_val:
             pesan = "Geolokasi tidak boleh kosong"
-            return False, pesan
-        if not geolokasi_val.replace(" ", "").isalpha():
-            pesan = "Geolokasi harus berupa huruf"
             return False, pesan
 
         if not limit_val:
@@ -41,6 +35,17 @@ class validateform:
                 return False, pesan
         except ValueError:
             pesan = "Delay harus berupa angka"
+            return False, pesan
+
+        return True, "Validasi berhasil!"
+
+    def validate_login_form(email, password):
+        if not email:
+            pesan = "Email tidak boleh kosong"
+            return False, pesan
+
+        if not password:
+            pesan = "Password tidak boleh kosong"
             return False, pesan
 
         return True, "Validasi berhasil!"

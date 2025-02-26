@@ -2,20 +2,17 @@
 import sys
 import pandas as pd
 import os
-import subprocess
+import webbrowser
 from datetime import datetime
 from databasesqlite import databasesqlite
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton
-from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton, QLabel, QFrame, QLineEdit, QHBoxLayout
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Slot, Qt
 from ui_form import Ui_MainWindow
 from validateform import validateform
-from scrapping import scrapping
 from tablehelper import TableHelper
-
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
+from api import API
+from checkuuidos import checkuuidos
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -24,17 +21,32 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Title Aplikasi
+        self.setWindowTitle("Lead Generator by GoRemote")
+
         # disabled tombol cancel
         self.ui.btnCancel.setEnabled(False)
 
-        # Hubungkan signal `dataInserted` dengan method `load_results`
+        # API INSTANCE
+        self.api_instance = API(self.ui)
+        self.uuidos = checkuuidos()
+
+        # Simpan koneksi database
+        # Buat objek databasesqlite dengan QObject
         self.db = databasesqlite()
-
-        # Panggil untuk menampilkan data awal
         self.load_results()
+        self.is_login = self.db.get_session()
 
-        # Title Aplikasi
-        self.setWindowTitle("Lead Generator by GoRemote")
+        if self.is_login == None:
+            self.ui.lblStatusLogin.setText("Not logged in")
+        else:
+            token_login = self.is_login[0]
+            sisa = self.api_instance.sisa_quota(token_login)
+            self.ui.lblStatusLogin.setText("Logged in")
+            self.ui.lblTitleSisaQuota.setText("Sisa Kuota : ")
+            self.ui.lblSisaKuota.setText(str(sisa))
+
+
 
         # Atur ukuran default
         width = 1200
@@ -49,7 +61,9 @@ class MainWindow(QMainWindow):
         self.ui.btnCancel.clicked.connect(self.cancel_scrapping)
         self.ui.tableRiwayatPencarian.cellDoubleClicked.connect(self.on_table_double_click)
         self.ui.progressBar.setValue(0)
+        self.ui.progressBar.setMaximum(100)
         self.ui.actionLogin.triggered.connect(self.login)
+        self.ui.actionLogout.triggered.connect(self.logout)
 
     def on_btn_search_clicked(self):
         #Tangkap input dari form
@@ -64,14 +78,176 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            scraper = scrapping(self.ui)
-            scraper.run_scrapping(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
+            uuid = self.uuidos.get_uuid()
+            self.api_instance.check_limit(uuid, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
 
     def login(self):
-        print("login")
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Sign In")
+        dlg.setFixedSize(300, 250)
+
+        layout = QVBoxLayout()
+
+        # Logo
+        logo = QLabel()
+        pixmap = QPixmap("./images/goremote.png")  # Pastikan path gambar benar
+        logo.setPixmap(pixmap)
+        logo.setScaledContents(True)  # Opsional: agar gambar menyesuaikan ukuran label
+        logo.setFixedSize(210, 70)
+        logo.setAlignment(Qt.AlignCenter)  # Memastikan logo sejajar horizontal di tengah
+        layout.addWidget(logo, alignment=Qt.AlignHCenter)  # Tambahkan logo di atas
+
+        # separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)  # Garis horizontal
+        separator.setFrameShadow(QFrame.Sunken)  # Efek 3D
+        separator.setFixedHeight(2)  # Ketebalan garis
+        layout.addWidget(separator)
+
+        # Input Email
+        email_input = QLineEdit()
+        email_input.setPlaceholderText("Email")
+        email_input.setStyleSheet("color:black;")
+        email_input.setFixedHeight(35)
+        layout.addWidget(email_input)
+
+        # Input Password
+        password_input = QLineEdit()
+        password_input.setPlaceholderText("Password")
+        password_input.setEchoMode(QLineEdit.Password)  # Menyembunyikan password
+        password_input.setStyleSheet("color:black;")
+        password_input.setFixedHeight(35)
+        layout.addWidget(password_input)
+
+        # Tombol Login
+        login_button = QPushButton("Login")
+        login_button.setFixedHeight(35)
+        login_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(0, 99, 204);
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(0, 130, 255); /* Lebih terang saat hover */
+            }
+            QPushButton:pressed {
+                background-color: rgb(0, 80, 180); /* Lebih gelap saat ditekan */
+            }
+        """)
+        layout.addWidget(login_button)
+        #login_button.clicked.connect(lambda: self.login_process(email_input, password_input))
+        login_button.clicked.connect(dlg.accept)
+
+        # Link "Belum mendaftar?"
+        register_label = QLabel('<a style="color:rgb(0, 99, 204);" href="https://goremote.id/leads-generator/">Belum mendaftar?</a>')
+        register_label.setTextFormat(Qt.RichText)  # Aktifkan HTML
+        register_label.setTextInteractionFlags(Qt.TextBrowserInteraction)  # Bisa diklik
+        register_label.setOpenExternalLinks(True)  # Tangani klik sendiri
+        register_label.setAlignment(Qt.AlignCenter)
+        # Menangani klik pada link
+        register_label.linkActivated.connect(self.open_register_page)
+        layout.addWidget(register_label)
+
+        layout.addStretch()  # Tambahkan stretch di atas agar logo terdorong ke atas
+        dlg.setLayout(layout)
+        # Tampilkan dialog dan cek hasilnya
+        if dlg.exec() == QDialog.Accepted:
+            self.login_process(email_input, password_input)
+
+    def logout(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Sign Out")
+        dlg.setFixedSize(300, 100)
+
+        # Layout utama
+        layout = QVBoxLayout()
+
+        # Pesan konfirmasi
+        message = QLabel("Anda yakin ingin logout?")
+        message.setStyleSheet("color:black;")
+        layout.addWidget(message)
+
+        # Layout untuk tombol
+        button_layout = QHBoxLayout()
+
+        # Tombol "Ya"
+        yes_button = QPushButton("Ya")
+        yes_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(0, 99, 204);
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(0, 130, 255);
+                color: white;
+            }
+            QPushButton:pressed {
+                background-color: rgb(0, 80, 180); /* Lebih gelap saat ditekan */
+            }
+        """)
+
+        yes_button.clicked.connect(dlg.accept)  # Menutup dialog dengan status 'Accepted'
+
+        # Tombol "Cancel"
+        cancel_button = QPushButton("Cancel")
+
+        cancel_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(150, 150, 150);
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(170, 170, 170); /* Sedikit lebih terang saat hover */
+            }
+            QPushButton:pressed {
+                background-color: rgb(120, 120, 120); /* Lebih gelap saat ditekan */
+            }
+        """)
+
+        cancel_button.clicked.connect(dlg.reject)  # Menutup dialog dengan status 'Rejected'
+
+        # Tambahkan tombol ke layout horizontal
+        button_layout.addWidget(yes_button)
+        button_layout.addWidget(cancel_button)
+
+        # Tambahkan semua layout ke dalam dialog
+        layout.addLayout(button_layout)
+        dlg.setLayout(layout)
+
+        # Tampilkan dialog dan cek hasilnya
+        if dlg.exec() == QDialog.Accepted:
+            self.logout_process()
+
+    def login_process(self, email, password):
+        email = email.text()
+        password = password.text()
+
+        is_valid, message = validateform.validate_login_form(email, password)
+
+        # Menampilkan pesan hasil validasi
+        if not is_valid:
+            self.show_error(message)
+        else:
+            self.api_instance.login_api(email, password)
+
+    def logout_process(self):
+        self.api_instance.logout_api()
+
+    def cancel_scrapping(self):
+        self.api_instance.cancel_process()
+
+    def open_register_page(self, link):
+        webbrowser.open(link)
 
     def on_table_double_click(self, row, column):
-
         if column == 0:
             item = self.ui.tableRiwayatPencarian.item(row, column)
             id = item.text()
@@ -99,8 +275,27 @@ class MainWindow(QMainWindow):
             TableHelper.populate_table(table, results)
 
             # Tombol Download (tanpa fungsi)
+            style_button = """
+            QPushButton {
+                background-color: #0078D7;
+                color: white;
+                border-radius: 8px;
+                padding: 8px 18px;
+                font-size: 13px;
+                font-weight: bold;
+                border: 2px solid #005A9E;
+            }
+            QPushButton:hover {
+                background-color: #005A9E;
+                border: 2px solid #003F73;
+            }
+            QPushButton:pressed {
+                background-color: #004A8F;
+                border: 2px solid #002F5E;
+            }
+            """
             btn_download = QPushButton("Download")
-            btn_download.setStyleSheet("color:white; font-weight:bold; background-color: blue;")
+            btn_download.setStyleSheet(style_button)
             btn_download.clicked.connect(lambda: self.download_by_id(id))
 
 
@@ -117,7 +312,7 @@ class MainWindow(QMainWindow):
             dlg.exec()
 
     def download_current_result(self):
-        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        search_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         results_current = self.db.get_current_result()
         # Tentukan folder Downloads berdasarkan sistem operasi
         if sys.platform.startswith("win"):  # Windows
@@ -138,7 +333,7 @@ class MainWindow(QMainWindow):
         self.success_download(message)
 
     def download_by_id(self,id):
-        search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        search_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         results_current = self.db.get_data_byid(id)
         # Tentukan folder Downloads berdasarkan sistem operasi
         if sys.platform.startswith("win"):  # Windows
@@ -158,11 +353,7 @@ class MainWindow(QMainWindow):
         message = f"File berhasil disimpan di: {file_path}"
         self.success_download(message)
 
-    def cancel_scrapping(self):
-        print("cancel diklik")
-
     def show_error(self, message):
-        # Menampilkan pesan kesalahan menggunakan QMessageBox
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Critical)
         msg.setWindowTitle("Error")

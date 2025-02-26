@@ -17,7 +17,11 @@ import requests
 import time
 import threading
 import re
-
+import subprocess
+import signal
+import sys
+import time
+import os
 
 class scrapping(QObject):
     update_table_terkini = Signal()
@@ -26,7 +30,7 @@ class scrapping(QObject):
         self.ui = ui
         self.update_table_terkini.connect(self.test_signal)
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")  # Mode headless (opsional)
+        chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=self.service, options=chrome_options)
         self.nama_lokasi = []
@@ -50,7 +54,7 @@ class scrapping(QObject):
         self.bisnisSegmentasi = None
         self.geolokasiBisnis = None
 
-    def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+    def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat):
         self.ui.btnCancel.setEnabled(True)
         self.ui.btnSearch.setEnabled(False)
         self.ui.btnDownload.setEnabled(False)
@@ -58,7 +62,7 @@ class scrapping(QObject):
         self.bisnisSegmentasi = bisnis_segmentasi
         self.geolokasiBisnis = geolokasi
         #Jalankan scrapping di thread terpisah agar GUI tidak not responding
-        thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian))
+        thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat))
         thread.start()
 
     def message_success(self):
@@ -74,7 +78,6 @@ class scrapping(QObject):
         msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
         msg.exec()
 
-
     def is_website_alive(self, url):
         """Cek apakah website masih aktif atau tidak."""
         try:
@@ -84,7 +87,7 @@ class scrapping(QObject):
             return False
 
 
-    def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+    def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat):
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
         # Buka halaman pencarian
@@ -93,7 +96,7 @@ class scrapping(QObject):
 
         # Proses scrapping
         self.search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian))
+        self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian), id_simpan_riwayat)
 
         print("Scrapping selesai.")
         self.driver.quit()
@@ -102,6 +105,7 @@ class scrapping(QObject):
         self.ui.btnCancel.setEnabled(False)
         self.ui.btnSearch.setEnabled(True)
         self.ui.btnDownload.setEnabled(True)
+
         self.ui.progressBar.setValue(0)
 
 
@@ -113,7 +117,7 @@ class scrapping(QObject):
         TableHelper.populate_table(self.ui.tableRiwayatPencarian, results_history)
 
 
-    def scrapping_process(self, driver, limit, delay):
+    def scrapping_process(self, driver, limit, delay, id_simpan_riwayat):
         db = databasesqlite()
         el_nama_lokasi = self.driver.find_elements("xpath", f"//*[contains(@class, 'hfpxzc')]")
         el_rating = self.driver.find_elements("css selector", f".MW4etd") or []  # Pastikan selalu ada
@@ -352,9 +356,62 @@ class scrapping(QObject):
             })
 
         jumlah_valid_results = sum(1 for result in self.results if result.get("nama_lokasi"))
-        #simpan riwayat pencarian
+        #simpan riwayat pencarian db lokal
         db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), jumlah_valid_results, self.search_date, self.results)
+        #simpan riwayat pencarian ke api
+        if id_simpan_riwayat:
+            from api import API
+            api_instance = API(self.ui)
+            api_instance.simpan_riwayat_pencarian(jumlah_valid_results, id_simpan_riwayat)
+
+            is_login = db.get_session()
+            token_login = is_login[0]
+            sisa = api_instance.sisa_quota(token_login)
+            self.ui.lblSisaKuota.setText(str(sisa))
+        else:
+            from api import API
+            api_instance = API(self.ui)
+            api_instance.update_limit_guest(jumlah_valid_results)
+
+    def cancel(self):
+        """Menutup Selenium dan memastikan ChromeDriver benar-benar berhenti di Windows, Linux, atau macOS."""
+        if self.driver:
+            try:
+                self.driver.quit()  # Tutup browser Selenium
+                self.driver = None  # Hapus referensi driver
+            except Exception as e:
+                print(f"Error saat menutup Selenium: {e}")
+
+        # Tunggu sebentar untuk memastikan driver berhenti
+        time.sleep(1)
+
+        # Deteksi OS dan gunakan perintah yang sesuai
+        if sys.platform.startswith("win"):  # Windows
+            try:
+                subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print("ChromeDriver berhasil dihentikan di Windows.")
+            except Exception as e:
+                print(f"Error saat mematikan ChromeDriver di Windows: {e}")
+
+        else:  # Linux / macOS
+            try:
+                subprocess.run(["pkill", "-f", "chromedriver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print("ChromeDriver berhasil dihentikan di Linux/macOS.")
+            except Exception as e:
+                print(f"Error saat mematikan ChromeDriver di Linux/macOS: {e}")
+
+        # Reset UI
+        self.ui.progressBar.setValue(0)
+        self.ui.btnCancel.setEnabled(False)
+        self.ui.btnSearch.setEnabled(True)
+        self.ui.btnDownload.setEnabled(True)
+
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Cancel")
+        msg.setText("Pencarian data dibatalkan")
+        msg.setStyleSheet("QLabel { color : white; } QPushButton { color : black; }")
+        msg.exec()
 
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")
-
