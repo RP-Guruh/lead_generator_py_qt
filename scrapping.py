@@ -50,7 +50,7 @@ class scrapping(QObject):
         self.bisnisSegmentasi = None
         self.geolokasiBisnis = None
 
-    def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+    def run_scrapping(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat):
         self.ui.btnCancel.setEnabled(True)
         self.ui.btnSearch.setEnabled(False)
         self.ui.btnDownload.setEnabled(False)
@@ -58,7 +58,7 @@ class scrapping(QObject):
         self.bisnisSegmentasi = bisnis_segmentasi
         self.geolokasiBisnis = geolokasi
         #Jalankan scrapping di thread terpisah agar GUI tidak not responding
-        thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian))
+        thread = threading.Thread(target=self._scrape, args=(bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat))
         thread.start()
 
     def message_success(self):
@@ -84,7 +84,7 @@ class scrapping(QObject):
             return False
 
 
-    def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian):
+    def _scrape(self, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian, id_simpan_riwayat):
         url_pencarian = f"https://www.google.com/maps/search/{bisnis_segmentasi}+di+{geolokasi}"
 
         # Buka halaman pencarian
@@ -93,7 +93,7 @@ class scrapping(QObject):
 
         # Proses scrapping
         self.search_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian))
+        self.scrapping_process(self.driver, int(limit_pencarian), int(delay_pencarian), id_simpan_riwayat)
 
         print("Scrapping selesai.")
         self.driver.quit()
@@ -113,7 +113,7 @@ class scrapping(QObject):
         TableHelper.populate_table(self.ui.tableRiwayatPencarian, results_history)
 
 
-    def scrapping_process(self, driver, limit, delay):
+    def scrapping_process(self, driver, limit, delay, id_simpan_riwayat):
         db = databasesqlite()
         el_nama_lokasi = self.driver.find_elements("xpath", f"//*[contains(@class, 'hfpxzc')]")
         el_rating = self.driver.find_elements("css selector", f".MW4etd") or []  # Pastikan selalu ada
@@ -357,7 +357,7 @@ class scrapping(QObject):
         #simpan riwayat pencarian ke api
         from api import API
         api_instance = API(self.ui)
-        api_instance.simpan_riwayat_pencarian(self.results)
+        api_instance.simpan_riwayat_pencarian(jumlah_valid_results, id_simpan_riwayat)
 
 
     def test_signal(self):

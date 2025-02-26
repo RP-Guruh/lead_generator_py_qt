@@ -186,10 +186,9 @@ class API(QObject):
 
                 if response.status_code == 200:
                     self.id_simpan_request = data["data"]["id"]
-                    print(self.id_simpan_request)
                     #jalanin scrapping disini
-                    #scraper = scrapping(self.ui)
-                    #scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian)
+                    scraper = scrapping(self.ui)
+                    scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian, self.id_simpan_request)
 
             except Exception as e:
                 print(e)
@@ -198,12 +197,45 @@ class API(QObject):
             #belum login berarti check dari uuid
 
 
-    def simpan_riwayat_pencarian(self, hasil_didapat):
+    def simpan_riwayat_pencarian(self, hasil_didapat, id_simpan_riwayat):
+        print("masuk ke sini untuk update")
+        session = self.database.get_session()
+        token = session[0] if session else None
+
+        if not token:
+            print("Token tidak ditemukan, pastikan user sudah login.")
+            return
+
         url = f"{self.URLAPI}/search/response"
         payload = {
-          "id": self.id_simpan_request,
+          "id": id_simpan_riwayat,
           "response_quota": hasil_didapat
         }
+
+
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+
+            print(f"Response status: {response.status_code}")
+            print(f"Response text: {response.text}")  # Debugging respons
+
+            response.raise_for_status()  # Akan error jika status bukan 2xx
+
+            data = response.json()  # Mengurai JSON setelah memastikan respons tidak kosong
+            print(data)
+
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Unexpected Error: {err}")
 
 
 
