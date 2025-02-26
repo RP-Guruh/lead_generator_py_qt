@@ -5,7 +5,7 @@ import os
 import webbrowser
 from datetime import datetime
 from databasesqlite import databasesqlite
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton, QLabel, QFrame, QLineEdit, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton, QLabel, QFrame, QLineEdit
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Slot, Qt
 from ui_form import Ui_MainWindow
@@ -13,6 +13,7 @@ from validateform import validateform
 from tablehelper import TableHelper
 from api import API
 from checkuuidos import checkuuidos
+from log import Logger
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -20,6 +21,11 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # inisialisasi log
+        self.logging = Logger()
+        self.logging.write_logging("Started application")
+
 
         # Title Aplikasi
         self.setWindowTitle("Lead Generator by GoRemote")

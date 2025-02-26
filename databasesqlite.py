@@ -1,4 +1,5 @@
 from PySide6.QtCore import Signal, QObject
+from log import Logger
 import sqlite3
 import os
 
@@ -10,6 +11,7 @@ class databasesqlite(QObject):
         self.db_file = "leadgenerator.db"
         self.conn = None
         self.connect_db()
+        self.logging = Logger()
 
     def connect_db(self):
         db_exists = os.path.exists(self.db_file)
@@ -123,7 +125,7 @@ class databasesqlite(QObject):
 
             print("Riwayat pencarian berhasil disimpan.")
         except sqlite3.Error as e:
-            print(f"Terjadi kesalahan saat menyimpan riwayat pencarian: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan saat menyimpan riwayat pencarian: {e}")
 
 
     def get_current_result(self):
@@ -144,7 +146,7 @@ class databasesqlite(QObject):
             return rows  # Kembalikan hasilnya
 
         except sqlite3.Error as e:
-            print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan saat mengambil data hasil: {e}")
             return []
 
     def get_search_history(self):
@@ -171,7 +173,7 @@ class databasesqlite(QObject):
             return rows  # Kembalikan hasilnya
 
         except sqlite3.Error as e:
-            print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan saat mengambil data hasil: {e}")
             return []
 
     def save_session_login(self, user_id, token, name, email, is_login):
@@ -187,7 +189,7 @@ class databasesqlite(QObject):
             print(f"Login berhasil! Selamat datang, {name}")
 
         except Exception as e:
-            print(f"Terjadi kesalahan: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan: {e}")
 
     def get_session(self):
         try:
@@ -200,7 +202,7 @@ class databasesqlite(QObject):
             return rows
 
         except sqlite3.Error as e:
-            print(f"Terjadi kesalahan saat mengambil data hasil: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan: {e}")
             return []
 
     def delete_session(self):
@@ -212,6 +214,6 @@ class databasesqlite(QObject):
             print("Logout berhasil! Sampai jumpa")
 
         except Exception as e:
-            print(f"Terjadi kesalahan: {e}")
+            self.logging.write_logging(f"Terjadi kesalahan: {e}")
 
 

@@ -7,6 +7,7 @@
         "scrapping.py",
         "api.py",
         "databasesqlite.py",
-        "tablehelper.py"
+        "tablehelper.py",
+        "log.py"
     ]
 }

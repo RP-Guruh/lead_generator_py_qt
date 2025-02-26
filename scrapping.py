@@ -13,6 +13,7 @@ from itertools import zip_longest
 from PySide6.QtWidgets import QMessageBox, QApplication
 from PySide6.QtCore import QMetaObject, Qt, QObject, Slot, Signal
 from tablehelper import TableHelper
+from log import Logger
 import requests
 import time
 import threading
@@ -29,6 +30,7 @@ class scrapping(QObject):
         super().__init__()
         self.ui = ui
         self.update_table_terkini.connect(self.test_signal)
+        self.logging = Logger()
         chrome_options = Options()
         chrome_options.add_argument("--headless")  # Mode headless (opsional)
         self.service = Service(ChromeDriverManager().install())
@@ -224,7 +226,7 @@ class scrapping(QObject):
                 QApplication.processEvents()
 
             except Exception as e:
-                print(f"Error navigating to {link}: {e}")
+                self.logging.write_logging(f"Error navigating to {link}: {e}")
 
             self.driver.back()
             time.sleep(delay)
@@ -309,10 +311,10 @@ class scrapping(QObject):
                             print("Email tidak ditemukan")
 
                     except Exception as e:
-                        print(f"Terjadi kesalahan saat mencari email: {e}")
+                        self.logging.write_logging(f"Terjadi kesalahan saat mencari email: {e}")
 
                 except (TimeoutException, NoSuchElementException) as e:
-                    print(f"Terjadi error saat memproses {url}: {e}")
+                    self.logging.write_logging(f"Terjadi error saat memproses {url}: {e}")
                     continue
 
                 self.driver.back()  # Hanya kembali jika website aktif
@@ -380,7 +382,7 @@ class scrapping(QObject):
                 self.driver.quit()  # Tutup browser Selenium
                 self.driver = None  # Hapus referensi driver
             except Exception as e:
-                print(f"Error saat menutup Selenium: {e}")
+                self.logging.write_logging(f"Error saat menutup Selenium: {e}")
 
         # Tunggu sebentar untuk memastikan driver berhenti
         time.sleep(1)
@@ -389,16 +391,16 @@ class scrapping(QObject):
         if sys.platform.startswith("win"):  # Windows
             try:
                 subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                print("ChromeDriver berhasil dihentikan di Windows.")
+                self.logging.write_logging("ChromeDriver berhasil dihentikan di Windows.")
             except Exception as e:
-                print(f"Error saat mematikan ChromeDriver di Windows: {e}")
+                self.logging.write_logging(f"Error saat mematikan ChromeDriver di Windows: {e}")
 
         else:  # Linux / macOS
             try:
                 subprocess.run(["pkill", "-f", "chromedriver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                print("ChromeDriver berhasil dihentikan di Linux/macOS.")
+                self.logging.write_logging("ChromeDriver berhasil dihentikan di Linux/macOS.")
             except Exception as e:
-                print(f"Error saat mematikan ChromeDriver di Linux/macOS: {e}")
+                self.logging.write_logging(f"Error saat mematikan ChromeDriver di Linux/macOS: {e}")
 
         # Reset UI
         self.ui.progressBar.setValue(0)

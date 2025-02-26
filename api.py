@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QObject
 from scrapping import scrapping
 from checkuuidos import checkuuidos
+from log import Logger
 import webbrowser
 import requests
 import json
@@ -17,6 +18,8 @@ class API(QObject):
         self.ui = ui
         self.id_simpan_request = None
         self.uuidos = checkuuidos()
+        # inisialisasi log
+        self.logging = Logger()
 
     def get_logger(self):
         """Fungsi dummy logger untuk menghindari error jika logger belum tersedia"""
@@ -85,19 +88,20 @@ class API(QObject):
         except requests.Timeout:
             # Menangani timeout error
             error_message = "Timeout error occurred during login"
-            self.logger.log_error(error_message)
+            self.logging.write_logging(error_message)
             self.show_message("Timeout", error_message, QMessageBox.Warning)
 
         except requests.ConnectionError:
             # Menangani error kegagalan koneksi
             error_message = "Connection failed during login"
-            self.logger.log_error(error_message)
+
+            self.logging.write_logging(error_message)
             self.show_message("Koneksi Gagal", error_message, QMessageBox.Critical)
 
         except Exception as e:
             # Menangani error lainnya
             error_message = f"An unexpected error occurred during login: {str(e)}"
-            self.logger.log_error(error_message)
+            self.logging.write_logging(error_message)
             self.show_message("Error", error_message, QMessageBox.Critical)
 
     def logout_api(self):
@@ -144,19 +148,19 @@ class API(QObject):
         except requests.Timeout:
             # Menangani timeout error
             error_message = "Timeout error occurred during logout"
-            self.logger.log_error(error_message)
+            self.logging.write_logging(error_message)
             self.show_message("Timeout", error_message, QMessageBox.Warning)
 
         except requests.ConnectionError:
             # Menangani error kegagalan koneksi
             error_message = "Connection failed during logout"
-            self.logger.log_error(error_message)
+            self.logging.write_logging(error_message)
             self.show_message("Koneksi Gagal", error_message, QMessageBox.Critical)
 
         except Exception as e:
             # Menangani error lainnya
             error_message = f"An unexpected error occurred during logout: {str(e)}"
-            self.logger.log_error(error_message)
+            self.logging.write_logging(error_message)
             self.show_message("Error", error_message, QMessageBox.Critical)
 
     def check_limit(self, uuid, bisnis_segmentasi, geolokasi, request_quota, delay_pencarian):
@@ -200,7 +204,7 @@ class API(QObject):
                     scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian, self.id_simpan_request)
 
             except Exception as e:
-                print(e)
+               self.logging.write_logging(e)
         else:
             #belum login berarti check dari uuid
             os = self.uuidos.get_os_name()
@@ -233,13 +237,13 @@ class API(QObject):
             response.raise_for_status()  # Akan error jika status bukan 2xx
 
         except requests.exceptions.HTTPError as errh:
-            print(f"HTTP Error: {errh}")
+            self.logging.write_logging(f"HTTP Error: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            print(f"Error Connecting: {errc}")
+            self.logging.write_logging(f"Error Connecting: {errc}")
         except requests.exceptions.Timeout as errt:
-            print(f"Timeout Error: {errt}")
+            self.logging.write_logging(f"Timeout Error: {errt}")
         except requests.exceptions.RequestException as err:
-            print(f"Unexpected Error: {err}")
+            self.logging.write_logging(f"Unexpected Error: {err}")
 
     def guest_request(self, os, arsitektur, uuid, bisnis_segmentasi, geolokasi, request_quota, delay_pencarian):
         print(uuid)
@@ -314,13 +318,13 @@ class API(QObject):
                 scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian, None)
 
         except requests.exceptions.HTTPError as errh:
-            print(f"HTTP Error: {errh}")
+            self.logging.write_logging(f"HTTP Error: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            print(f"Error Connecting: {errc}")
+            self.logging.write_logging(f"Error Connecting: {errc}")
         except requests.exceptions.Timeout as errt:
-            print(f"Timeout Error: {errt}")
+            self.logging.write_logging(f"Timeout Error: {errt}")
         except requests.exceptions.RequestException as err:
-            print(f"Unexpected Error: {err}")
+            self.logging.write_logging(f"Unexpected Error: {err}")
 
 
     def update_limit_guest(self, used_limit):
@@ -342,13 +346,13 @@ class API(QObject):
             response = requests.post(url, json=payload, headers=headers, timeout=10)
 
         except requests.exceptions.HTTPError as errh:
-            print(f"HTTP Error: {errh}")
+            self.logging.write_logging(f"HTTP Error: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            print(f"Error Connecting: {errc}")
+            self.logging.write_logging(f"Error Connecting: {errc}")
         except requests.exceptions.Timeout as errt:
-            print(f"Timeout Error: {errt}")
+            self.logging.write_logging(f"Timeout Error: {errt}")
         except requests.exceptions.RequestException as err:
-            print(f"Unexpected Error: {err}")
+            self.logging.write_logging(f"Unexpected Error: {err}")
 
     def sisa_quota(self, token):
         url = f"{self.URLAPI}/quota"
@@ -363,13 +367,13 @@ class API(QObject):
             quota_saat_ini = data['data']['sisa_quota']
             return quota_saat_ini
         except requests.exceptions.HTTPError as errh:
-            print(f"HTTP Error: {errh}")
+            self.logging.write_logging(f"HTTP Error: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            print(f"Error Connecting: {errc}")
+            self.logging.write_logging(f"Error Connecting: {errc}")
         except requests.exceptions.Timeout as errt:
-            print(f"Timeout Error: {errt}")
+            self.logging.write_logging(f"Timeout Error: {errt}")
         except requests.exceptions.RequestException as err:
-            print(f"Unexpected Error: {err}")
+            self.logging.write_logging(f"Unexpected Error: {err}")
 
     def cancel_process(self):
         scraper = scrapping(self.ui)
