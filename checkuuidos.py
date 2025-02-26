@@ -2,18 +2,24 @@ import uuid
 import platform
 
 class checkuuidos:
-    def __init__(self):
-        pass
+    @staticmethod
+    def get_os_name():
+        """Mendapatkan nama sistem operasi."""
+        return platform.system()
 
     @staticmethod
-    def generate_uuid():
-        os_name = platform.system()
+    def get_architecture():
+        """Mendapatkan arsitektur sistem (32-bit / 64-bit)."""
+        return platform.architecture()[0]
+
+    @staticmethod
+    def get_uuid():
+        """Mendapatkan UUID perangkat sesuai OS."""
+        os_name = checkuuidos.get_os_name()
 
         if os_name == "Windows":
-            # Mendapatkan UUID di Windows
             return str(uuid.UUID(int=uuid.getnode()))
-        elif os_name == "Linux" or os_name == "Darwin":  # Darwin untuk macOS
-            # Mendapatkan UUID di Linux atau macOS
+        elif os_name in ["Linux", "Darwin"]:  # Darwin untuk macOS
             try:
                 with open('/etc/machine-id', 'r') as file:
                     return file.read().strip()
@@ -22,3 +28,8 @@ class checkuuidos:
                     return file.read().strip()
         else:
             return "OS tidak dikenali"
+
+# Contoh penggunaan
+# os_name = CheckUUIDOS.get_os_name()
+# architecture = CheckUUIDOS.get_architecture()
+# uuid_str = CheckUUIDOS.get_uuid()

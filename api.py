@@ -1,10 +1,11 @@
-import requests
-import json
 from databasesqlite import databasesqlite
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QObject
 from scrapping import scrapping
+from checkuuidos import checkuuidos
 import webbrowser
+import requests
+import json
 
 class API(QObject):
     URLAPI = "https://lead-generator.goremote.id/api"
@@ -15,7 +16,7 @@ class API(QObject):
         self.logger = self.get_logger()
         self.ui = ui
         self.id_simpan_request = None
-
+        self.uuidos = checkuuidos()
 
     def get_logger(self):
         """Fungsi dummy logger untuk menghindari error jika logger belum tersedia"""
@@ -62,6 +63,12 @@ class API(QObject):
                 self.logger.log_info("Login berhasil")
                 self.show_message("Login Berhasil", f"Selamat datang, {data['user']['name']}!", QMessageBox.Information)
                 self.ui.lblStatusLogin.setText("You logged in")
+
+                self.is_login = self.database.get_session()
+                token_login = self.is_login[0]
+                sisa = self.sisa_quota(token_login)
+                self.ui.lblTitleSisaQuota.setText("Sisa Kuota : ")
+                self.ui.lblSisaKuota.setText(str(sisa))
 
             elif response.status_code == 401:
                 # Login gagal (email/password salah)
@@ -120,6 +127,8 @@ class API(QObject):
                 self.logger.log_info("Logout berhasil")
                 self.show_message("Logout Berhasil", "Anda telah logout.", QMessageBox.Information)
                 self.ui.lblStatusLogin.setText("Logged out")
+                self.ui.lblTitleSisaQuota.setText("")
+                self.ui.lblSisaKuota.setText("")
 
             elif response.status_code == 401:
                 error_message = "Logout gagal, harap ulangi kembali"
@@ -193,9 +202,11 @@ class API(QObject):
             except Exception as e:
                 print(e)
         else:
-            print("kita cek dari uuid")
             #belum login berarti check dari uuid
-
+            os = self.uuidos.get_os_name()
+            arsitektur = self.uuidos.get_architecture()
+            uuid = self.uuidos.get_uuid()
+            self.guest_request(os, arsitektur, uuid, bisnis_segmentasi, geolokasi, request_quota, delay_pencarian)
 
     def simpan_riwayat_pencarian(self, hasil_didapat, id_simpan_riwayat):
         print("masuk ke sini untuk update")
@@ -212,7 +223,6 @@ class API(QObject):
           "response_quota": hasil_didapat
         }
 
-
         try:
             headers = {
                 "Content-Type": "application/json",
@@ -220,14 +230,137 @@ class API(QObject):
             }
             response = requests.post(url, json=payload, headers=headers, timeout=10)
 
-            print(f"Response status: {response.status_code}")
-            print(f"Response text: {response.text}")  # Debugging respons
-
             response.raise_for_status()  # Akan error jika status bukan 2xx
 
-            data = response.json()  # Mengurai JSON setelah memastikan respons tidak kosong
-            print(data)
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Unexpected Error: {err}")
 
+    def guest_request(self, os, arsitektur, uuid, bisnis_segmentasi, geolokasi, request_quota, delay_pencarian):
+        # cek dulu uuid nya udah kedatar belum
+        """ Cek apakah UUID sudah terdaftar dan handle batasan limit """
+        url = f"{self.URLAPI}/guest-request?uuid_os={uuid}"
+        try:
+            headers = {
+                "Content-Type": "application/json"
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+
+            if response.status_code != 200:
+                print(f"Error: Server mengembalikan status {response.status_code}")
+                return
+
+            data = response.json()  # Pastikan response.json() dipanggil
+            user_data = data.get("data", {})
+
+            if not user_data:  # Jika 'data' kosong
+                url = f"{self.URLAPI}/guest-request"
+                payload = {
+                    "uuid_os": uuid,
+                    "os_name": os,
+                    "arch_os": arsitektur,
+                    "used_limit": request_quota
+                }
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                response = requests.post(url, json=payload, headers=headers, timeout=10)
+                data = response.json()
+                response_data = data.get("data", {})
+
+                if not response_data: # Jika data kosong, artinya limit melebihi
+                    self.show_message(
+                        "Limited Access!",
+                        "Anda melebihi batas limit, limit hanya 5 untuk pengguna guest.\n"
+                        "Kunjungi goremote.id untuk dapatkan limit data tanpa batas!",
+                        QMessageBox.Information
+                    )
+                    webbrowser.open("https://goremote.id/leads-generator/")
+                    return
+                else:
+                    scraper = scrapping(self.ui)
+                    scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian, None)
+
+            # Jika UUID ditemukan, ambil datanya
+            # Cek apakah response JSON memiliki data
+            if user_data and isinstance(user_data, dict):
+                max_limit = user_data.get('max_limit', 0)
+                used_limit = user_data.get('used_limit', 0)
+            else:
+                print("Warning: Data user tidak ditemukan atau format tidak sesuai.")
+                max_limit = 5
+                used_limit = 0
+
+
+            limit_akhir = used_limit + int(request_quota)
+
+            # Cek apakah masih bisa request data
+            if limit_akhir > max_limit:
+                self.show_message(
+                    "Limited Access!",
+                    "Anda sedang menggunakan Trial Package (Max 5 Data).\n"
+                    "Kunjungi goremote.id untuk dapatkan limit data tanpa batas!",
+                    QMessageBox.Information
+                )
+                webbrowser.open("https://goremote.id/leads-generator/")
+            else:
+                scraper = scrapping(self.ui)
+                scraper.run_scrapping(bisnis_segmentasi, geolokasi, request_quota, delay_pencarian, None)
+
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Unexpected Error: {err}")
+
+
+    def update_limit_guest(self, used_limit):
+        os = self.uuidos.get_os_name()
+        arsitektur = self.uuidos.get_architecture()
+        uuid = self.uuidos.get_uuid()
+        url = f"{self.URLAPI}/guest-request"
+        try:
+            headers = {
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "uuid_os": uuid,
+                "os_name": os,
+                "arch_os": arsitektur,
+                "used_limit": used_limit
+            }
+
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Unexpected Error: {err}")
+
+    def sisa_quota(self, token):
+        url = f"{self.URLAPI}/quota"
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+
+            response = requests.get(url, headers=headers, timeout=10)
+            data = response.json()
+            quota_saat_ini = data['data']['sisa_quota']
+            return quota_saat_ini
         except requests.exceptions.HTTPError as errh:
             print(f"HTTP Error: {errh}")
         except requests.exceptions.ConnectionError as errc:

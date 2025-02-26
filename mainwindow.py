@@ -35,15 +35,25 @@ class MainWindow(QMainWindow):
         self.api_instance = API(self.ui)
         self.uuidos = checkuuidos()
 
+
         # Simpan koneksi database
         # Buat objek databasesqlite dengan QObject
         self.db = databasesqlite()
         self.load_results()
         self.is_login = self.db.get_session()
+
         if self.is_login == None:
             self.ui.lblStatusLogin.setText("Not logged in")
         else:
+            token_login = self.is_login[0]
+            sisa = self.api_instance.sisa_quota(token_login)
             self.ui.lblStatusLogin.setText("Logged in")
+            self.ui.lblTitleSisaQuota.setText("Sisa Kuota : ")
+            self.ui.lblSisaKuota.setText(str(sisa))
+            #self.api_instance(self.is_lo
+
+
+
         # Atur ukuran default
         width = 1200
         height = 690
@@ -102,7 +112,7 @@ class MainWindow(QMainWindow):
         if not is_valid:
             self.show_error(message)
         else:
-            uuid = self.uuidos.generate_uuid()
+            uuid = self.uuidos.get_uuid()
             self.api_instance.check_limit(uuid, bisnis_segmentasi, geolokasi, limit_pencarian, delay_pencarian)
 
     def login(self):
@@ -263,6 +273,7 @@ class MainWindow(QMainWindow):
             self.show_error(message)
         else:
             self.api_instance.login_api(email, password)
+
 
 
     def logout_process(self):

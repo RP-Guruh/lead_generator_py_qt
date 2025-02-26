@@ -355,10 +355,19 @@ class scrapping(QObject):
         #simpan riwayat pencarian db lokal
         db.save_search_history(self.bisnisSegmentasi, self.geolokasiBisnis, int(limit), int(delay), jumlah_valid_results, self.search_date, self.results)
         #simpan riwayat pencarian ke api
-        from api import API
-        api_instance = API(self.ui)
-        api_instance.simpan_riwayat_pencarian(jumlah_valid_results, id_simpan_riwayat)
+        if id_simpan_riwayat:
+            from api import API
+            api_instance = API(self.ui)
+            api_instance.simpan_riwayat_pencarian(jumlah_valid_results, id_simpan_riwayat)
 
+            is_login = db.get_session()
+            token_login = is_login[0]
+            sisa = api_instance.sisa_quota(token_login)
+            self.ui.lblSisaKuota.setText(str(sisa))
+        else:
+            from api import API
+            api_instance = API(self.ui)
+            api_instance.update_limit_guest(jumlah_valid_results)
 
     def test_signal(self):
         print("✅ test_signal() terpanggil dari scrapping!")
